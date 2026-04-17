@@ -1,0 +1,5 @@
+bin/
+*.exe
+*.pid
+.env
+.tmp
