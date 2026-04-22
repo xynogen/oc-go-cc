@@ -265,7 +265,7 @@ Environment variables override config file values. Config values also support `$
 | `OGC_CONFIG` | Custom config file path | `~/.config/oc-go-cc/config.json` |
 | `OGC_HOST` | Proxy listen host | `127.0.0.1` |
 | `OGC_PORT` | Proxy listen port | `3456` |
-| `OGC_OPENAI_BASE` | OpenAI-compatible backend base URL | `https://opencode.ai/zen/go/v1/chat/completions` |
+| `OGC_OPENAI_BASE` | Full URL to your OpenAI-compatible `/v1/chat/completions` endpoint | `https://opencode.ai/zen/go/v1/chat/completions` |
 | `OGC_LOG_LEVEL` | Log level: `debug`, `info`, `warn`, `error` | `info` |
 
 ### Model Routing
