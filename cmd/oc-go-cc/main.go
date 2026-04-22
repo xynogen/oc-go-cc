@@ -249,6 +249,7 @@ func validateCmd() *cobra.Command {
 			fmt.Printf("  API Key: %s...\n", maskString(cfg.APIKey, 8))
 			fmt.Printf("  Base URL: %s\n", cfg.OpenCodeGo.BaseURL)
 			fmt.Printf("  Models configured: %d\n", len(cfg.Models))
+			fmt.Printf("  Model mappings: %d\n", len(cfg.ModelMapping))
 			fmt.Printf("  Fallback chains: %d\n", len(cfg.Fallbacks))
 			return nil
 		},
@@ -354,85 +355,49 @@ func maskString(s string, visible int) string {
 }
 
 // getDefaultConfig returns a default configuration JSON template.
-// Optimized for cost-efficiency: uses cheaper models by default, expensive ones only when needed.
+// Model selection is controlled via model_mapping (map Claude Code model directly to target model ID).
 func getDefaultConfig() string {
 	return `{
   "api_key": "${OC_GO_CC_API_KEY}",
   "host": "127.0.0.1",
   "port": 3456,
   "models": {
-    "budget": {
+    "minimax-m2.7": {
       "provider": "opencode-go",
-      "model_id": "qwen3.6-plus",
+      "model_id": "minimax-m2.7",
       "temperature": 0.7,
-      "max_tokens": 4096
+      "max_tokens": 65536
     },
-    "background": {
-      "provider": "opencode-go",
-      "model_id": "qwen3.5-plus",
-      "temperature": 0.5,
-      "max_tokens": 2048
-    },
-    "default": {
-      "provider": "opencode-go",
-      "model_id": "kimi-k2.6",
-      "temperature": 0.7,
-      "max_tokens": 4096
-    },
-    "long_context": {
+    "minimax-m2.5": {
       "provider": "opencode-go",
       "model_id": "minimax-m2.5",
       "temperature": 0.7,
-      "max_tokens": 16384,
-      "context_threshold": 80000
+      "max_tokens": 65536
     },
-    "think": {
+    "qwen3.5-plus": {
       "provider": "opencode-go",
-      "model_id": "glm-5",
+      "model_id": "qwen3.5-plus",
       "temperature": 0.7,
-      "max_tokens": 8192
-    },
-    "complex": {
-      "provider": "opencode-go",
-      "model_id": "glm-5.1",
-      "temperature": 0.7,
-      "max_tokens": 4096
-    },
-    "fast": {
-      "provider": "opencode-go",
-      "model_id": "qwen3.6-plus",
-      "temperature": 0.7,
-      "max_tokens": 4096
+      "max_tokens": 32768
     }
   },
+  "model_mapping": {
+    "claude-opus": "minimax-m2.7",
+    "claude-sonnet": "minimax-m2.5",
+    "claude-haiku": "qwen3.5-plus"
+  },
   "fallbacks": {
-    "budget": [
-      { "provider": "opencode-go", "model_id": "kimi-k2.6" },
-      { "provider": "opencode-go", "model_id": "mimo-v2-pro" }
+    "minimax-m2.7": [
+      { "provider": "opencode-go", "model_id": "minimax-m2.5" },
+      { "provider": "opencode-go", "model_id": "glm-5.1" }
     ],
-    "background": [
+    "minimax-m2.5": [
+      { "provider": "opencode-go", "model_id": "glm-5.1" },
+      { "provider": "opencode-go", "model_id": "qwen3.5-plus" }
+    ],
+    "qwen3.5-plus": [
       { "provider": "opencode-go", "model_id": "qwen3.6-plus" },
-      { "provider": "opencode-go", "model_id": "minimax-m2.5" }
-    ],
-    "default": [
-      { "provider": "opencode-go", "model_id": "mimo-v2-pro" },
-      { "provider": "opencode-go", "model_id": "qwen3.6-plus" }
-    ],
-    "long_context": [
-      { "provider": "opencode-go", "model_id": "minimax-m2.7" },
       { "provider": "opencode-go", "model_id": "kimi-k2.6" }
-    ],
-    "think": [
-      { "provider": "opencode-go", "model_id": "kimi-k2.6" },
-      { "provider": "opencode-go", "model_id": "mimo-v2-pro" }
-    ],
-    "complex": [
-      { "provider": "opencode-go", "model_id": "glm-5" },
-      { "provider": "opencode-go", "model_id": "kimi-k2.6" }
-    ],
-    "fast": [
-      { "provider": "opencode-go", "model_id": "qwen3.5-plus" },
-      { "provider": "opencode-go", "model_id": "minimax-m2.5" }
     ]
   },
   "opencode_go": {

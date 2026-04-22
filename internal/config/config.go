@@ -3,14 +3,19 @@ package config
 
 // Config holds the complete application configuration.
 type Config struct {
-	APIKey     string                   `json:"api_key"`
-	Host       string                   `json:"host"`
-	Port       int                      `json:"port"`
-	Models     map[string]ModelConfig   `json:"models"`
-	Fallbacks  map[string][]ModelConfig `json:"fallbacks"`
-	OpenCodeGo OpenCodeGoConfig         `json:"opencode_go"`
-	Logging    LoggingConfig            `json:"logging"`
+	APIKey       string                   `json:"api_key"`
+	Host         string                   `json:"host"`
+	Port         int                      `json:"port"`
+	Models       map[string]ModelConfig   `json:"models"`
+	Fallbacks    map[string][]ModelConfig `json:"fallbacks"`
+	OpenCodeGo   OpenCodeGoConfig         `json:"opencode_go"`
+	Logging      LoggingConfig            `json:"logging"`
+	ModelMapping map[string]string        `json:"model_mapping"`
 }
+
+// ModelMapping maps Claude Code model patterns to OpenCode Go model IDs.
+// Example: "claude-sonnet-*" -> "kimi-k2.6"
+// The target model ID must exist in Models config.
 
 // ModelConfig defines routing rules for a specific model.
 type ModelConfig struct {

@@ -153,54 +153,23 @@ func (h *MessagesHandler) HandleMessages(w http.ResponseWriter, r *http.Request)
 		"max_tokens", anthropicReq.MaxTokens,
 	)
 
-	// Build message content for routing and token counting.
-	var routerMessages []router.MessageContent
-	var tokenMessages []token.MessageContent
-	systemText := anthropicReq.SystemText()
-
-	for _, msg := range anthropicReq.Messages {
-		blocks := msg.ContentBlocks()
-		content := extractTextFromBlocks(blocks)
-		mc := router.MessageContent{
-			Role:    msg.Role,
-			Content: content,
-		}
-		routerMessages = append(routerMessages, mc)
-		tokenMessages = append(tokenMessages, token.MessageContent{
-			Role:    msg.Role,
-			Content: content,
-		})
+	// Route to appropriate model based on model_mapping (user-selected model).
+	modelConfig := h.matchModel(anthropicReq.Model)
+	if modelConfig.ModelID == "" {
+		h.sendError(w, http.StatusInternalServerError, "no model mapping found", fmt.Errorf("model %q not mapped", anthropicReq.Model))
+		return
 	}
 
-	// Count tokens.
-	tokenCount, err := h.tokenCounter.CountMessages(systemText, tokenMessages)
-	if err != nil {
-		h.logger.Warn("failed to count tokens", "error", err)
-		tokenCount = 0
-	}
-
-	// Route to appropriate model.
-	// For streaming, use faster models to minimize TTFT (time-to-first-token)
-	var routeResult router.RouteResult
-	if isStreaming {
-		routeResult = h.modelRouter.RouteForStreaming(routerMessages, tokenCount)
-	} else {
-		var err error
-		routeResult, err = h.modelRouter.Route(routerMessages, tokenCount)
-		if err != nil {
-			h.sendError(w, http.StatusInternalServerError, "routing failed", err)
-			return
-		}
-	}
-
-	h.logger.Info("routing request",
-		"scenario", routeResult.Scenario,
-		"model", routeResult.Primary.ModelID,
-		"tokens", tokenCount,
+	h.logger.Info("model mapped",
+		"requested", anthropicReq.Model,
+		"using", modelConfig.ModelID,
 	)
 
-	// Build fallback chain.
-	modelChain := routeResult.GetModelChain()
+	// Build chain: primary + fallbacks.
+	modelChain := []config.ModelConfig{modelConfig}
+	if fallbacks, ok := h.config.Fallbacks[modelConfig.ModelID]; ok {
+		modelChain = append(modelChain, fallbacks...)
+	}
 
 	if isStreaming {
 		// Streaming: use ProxyStream for real-time SSE transformation
@@ -368,6 +337,23 @@ func isClientDisconnected(r *http.Request) bool {
 	}
 }
 
+// forceStreamTrue sets "stream":true in the raw JSON body.
+func forceStreamTrue(rawBody json.RawMessage) json.RawMessage {
+	bodyStr := string(rawBody)
+	if strings.Contains(bodyStr, `"stream":false`) {
+		return json.RawMessage(strings.Replace(bodyStr, `"stream":false`, `"stream":true`, 1))
+	}
+	if strings.Contains(bodyStr, `"stream": false`) {
+		return json.RawMessage(strings.Replace(bodyStr, `"stream": false`, `"stream": true`, 1))
+	}
+	if !strings.Contains(bodyStr, `"stream"`) {
+		if last := strings.LastIndex(bodyStr, "}"); last != -1 {
+			return json.RawMessage(bodyStr[:last] + `,"stream":true}`)
+		}
+	}
+	return rawBody
+}
+
 // replaceModelInRawBody replaces the model field in raw JSON body with the actual model ID.
 // This is needed for Anthropic endpoint which validates the model name.
 func replaceModelInRawBody(rawBody json.RawMessage, modelID string) json.RawMessage {
@@ -503,58 +489,55 @@ func (h *MessagesHandler) handleNonStreaming(
 	w.Write(responseBody)
 }
 
-// executeAnthropicRequest executes a request to the Anthropic endpoint (for MiniMax models).
+// executeAnthropicRequest streams from the Anthropic endpoint (for MiniMax models)
+// and reassembles the SSE events into a complete MessageResponse.
 func (h *MessagesHandler) executeAnthropicRequest(
 	ctx context.Context,
 	rawBody json.RawMessage,
 	model config.ModelConfig,
 ) ([]byte, error) {
-	// Send raw Anthropic request to Anthropic endpoint
-	resp, err := h.client.SendAnthropicRequest(ctx, rawBody, false)
+	// Replace model name and force streaming upstream
+	body := forceStreamTrue(replaceModelInRawBody(rawBody, model.ModelID))
+
+	resp, err := h.client.SendAnthropicRequest(ctx, body, true)
 	if err != nil {
 		return nil, fmt.Errorf("anthropic request failed: %w", err)
 	}
-	defer resp.Body.Close()
 
-	// Read the response (already in Anthropic format)
-	body, err := io.ReadAll(resp.Body)
+	anthropicResp, err := transformer.CollectAnthropicStream(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read response: %w", err)
+		return nil, fmt.Errorf("failed to collect anthropic stream: %w", err)
 	}
 
-	h.logger.Debug("anthropic response", "body", string(body))
-
-	return body, nil
+	return json.Marshal(anthropicResp)
 }
 
-// executeOpenAIRequest executes a request to the OpenAI endpoint with transformation.
+// executeOpenAIRequest streams from the OpenAI endpoint and reassembles into a MessageResponse.
 func (h *MessagesHandler) executeOpenAIRequest(
 	ctx context.Context,
 	anthropicReq *types.MessageRequest,
 	model config.ModelConfig,
 ) ([]byte, error) {
-	// Transform request to OpenAI format.
 	openaiReq, err := h.requestTransformer.TransformRequest(anthropicReq, model)
 	if err != nil {
 		return nil, fmt.Errorf("request transform failed: %w", err)
 	}
 
-	// Log the transformed request for debugging
-	reqJSON, _ := json.Marshal(openaiReq)
-	h.logger.Debug("transformed OpenAI request", "body", string(reqJSON))
+	// Force streaming upstream
+	streamTrue := true
+	openaiReq.Stream = &streamTrue
 
-	// Handle non-streaming.
-	resp, err := h.client.ChatCompletionNonStreaming(ctx, model.ModelID, openaiReq)
+	streamBody, err := h.client.GetStreamingBody(ctx, model.ModelID, openaiReq)
 	if err != nil {
-		return nil, fmt.Errorf("chat completion failed: %w", err)
+		return nil, fmt.Errorf("streaming request failed: %w", err)
 	}
 
-	// Log the raw response for debugging
-	respJSON, _ := json.Marshal(resp)
-	h.logger.Debug("OpenAI response", "body", string(respJSON))
+	openaiResp, err := transformer.CollectOpenAIStream(streamBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to collect openai stream: %w", err)
+	}
 
-	// Transform response to Anthropic format.
-	anthropicResp, err := h.responseTransformer.TransformResponse(resp, model.ModelID)
+	anthropicResp, err := h.responseTransformer.TransformResponse(openaiResp, model.ModelID)
 	if err != nil {
 		return nil, fmt.Errorf("response transform failed: %w", err)
 	}
@@ -601,4 +584,33 @@ func (h *MessagesHandler) sendError(w http.ResponseWriter, statusCode int, messa
 
 	errorResp := transformer.TransformErrorResponse(statusCode, message)
 	json.NewEncoder(w).Encode(errorResp)
+}
+
+// matchModel finds the ModelConfig for a given model name.
+// Checks model_mapping: exact match first, then prefix match (e.g. "claude-sonnet" matches "claude-sonnet-4-6").
+// Falls back to direct Models lookup if no mapping found.
+func (h *MessagesHandler) matchModel(model string) config.ModelConfig {
+	if h.config.ModelMapping != nil {
+		// Exact match
+		if targetModel, ok := h.config.ModelMapping[model]; ok {
+			if cfg, ok := h.config.Models[targetModel]; ok {
+				return cfg
+			}
+		}
+		// Prefix match: key must be a prefix of the requested model
+		for prefix, targetModel := range h.config.ModelMapping {
+			if strings.HasPrefix(model, prefix) {
+				if cfg, ok := h.config.Models[targetModel]; ok {
+					return cfg
+				}
+			}
+		}
+	}
+
+	// Direct Models lookup
+	if cfg, ok := h.config.Models[model]; ok {
+		return cfg
+	}
+
+	return config.ModelConfig{}
 }
