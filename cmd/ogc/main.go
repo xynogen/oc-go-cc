@@ -288,7 +288,7 @@ func modelsCmd() *cobra.Command {
 // getConfigDir returns the default configuration directory path.
 func getConfigDir() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".config", "oc-go-cc")
+	return filepath.Join(home, ".config", "ogc")
 }
 
 // autostartCmd returns the command to manage autostart on login.
