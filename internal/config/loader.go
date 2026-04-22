@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	defaultConfigPath       = "~/.config/oc-go-cc/config.json"
+	defaultConfigPath       = "~/.config/ogc/config.json"
 	defaultHost             = "127.0.0.1"
 	defaultPort             = 3456
 	defaultBaseURL          = "https://opencode.ai/zen/go/v1"
@@ -26,7 +26,7 @@ var envVarPattern = regexp.MustCompile(`\$\{([A-Za-z0-9_]+)\}`)
 // Load reads configuration from a JSON file and applies environment variable overrides.
 // Config path resolution:
 //  1. OGC_CONFIG env var (explicit override)
-//  2. ~/.config/oc-go-cc/config.json (default)
+//  2. ~/.config/ogc/config.json (default)
 func Load() (*Config, error) {
 	configPath := resolveConfigPath()
 

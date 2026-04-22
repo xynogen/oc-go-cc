@@ -11,15 +11,15 @@ import (
 
 const (
 	AppName     = "ogc"
-	ConfigDir   = ".config/oc-go-cc"
+	ConfigDir   = ".config/ogc"
 	LaunchAgent = "com.xynogen.ogc"
 )
 
 // Paths holds well-known directories and files for the app.
 type Paths struct {
-	ConfigDir  string // ~/.config/oc-go-cc
-	PIDFile    string // ~/.config/oc-go-cc/ogc.pid
-	LogFile    string // ~/.config/oc-go-cc/ogc.log
+	ConfigDir  string // ~/.config/ogc
+	PIDFile    string // ~/.config/ogc/ogc.pid
+	LogFile    string // ~/.config/ogc/ogc.log
 	PlistPath  string // ~/Library/LaunchAgents/com.xynogen.ogc.plist
 	BinaryPath string // absolute path to the running executable
 }
@@ -51,7 +51,7 @@ func DefaultPaths() (*Paths, error) {
 	}, nil
 }
 
-// EnsureConfigDir creates ~/.config/oc-go-cc/ if it does not exist.
+// EnsureConfigDir creates ~/.config/ogc/ if it does not exist.
 func (p *Paths) EnsureConfigDir() error {
 	return os.MkdirAll(p.ConfigDir, 0755)
 }
@@ -113,7 +113,7 @@ func FindBinary() (string, error) {
 		}
 	}
 
-	// Fallback: search PATH for oc-go-cc
+	// Fallback: search PATH for ogc
 	cmd := exec.Command("which", AppName)
 	output, err := cmd.Output()
 	if err != nil {

@@ -1,4 +1,4 @@
-module github.com/xynogen/oc-go-cc
+module github.com/xynogen/ogc
 
 go 1.25.0
 

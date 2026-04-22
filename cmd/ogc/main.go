@@ -1,4 +1,4 @@
-// Package main is the CLI entry point for the oc-go-cc proxy server.
+// Package main is the CLI entry point for the ogc proxy server.
 package main
 
 import (
@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/xynogen/oc-go-cc/internal/config"
-	"github.com/xynogen/oc-go-cc/internal/daemon"
-	"github.com/xynogen/oc-go-cc/internal/server"
+	"github.com/xynogen/ogc/internal/config"
+	"github.com/xynogen/ogc/internal/daemon"
+	"github.com/xynogen/ogc/internal/server"
 )
 
 const (
@@ -29,7 +29,7 @@ func main() {
 with Claude Code. It intercepts Claude Code's Anthropic API requests,
 transforms them to OpenAI format, and forwards them to your configured endpoint.
 
-Configuration is stored at ~/.config/oc-go-cc/config.json`,
+Configuration is stored at ~/.config/ogc/config.json`,
 		Version: version,
 	}
 
