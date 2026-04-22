@@ -1,8 +1,8 @@
-# oc-go-cc
+# ogc
 
 A Go CLI proxy that lets you use any [OpenAI-compatible API](https://platform.openai.com/docs/api-reference/chat) with [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
-`oc-go-cc` sits between Claude Code and your chosen backend, intercepting Anthropic API requests, transforming them to OpenAI Chat Completions format, and forwarding them to your endpoint. Claude Code thinks it's talking to Anthropic — but your requests go to whichever models and provider you configure.
+`ogc` sits between Claude Code and your chosen backend, intercepting Anthropic API requests, transforming them to OpenAI Chat Completions format, and forwarding them to your endpoint. Claude Code thinks it's talking to Anthropic — but your requests go to whichever models and provider you configure.
 
 ## Why?
 
@@ -27,39 +27,37 @@ Claude Code is locked to the Anthropic API format. This proxy breaks that lock: 
 ### Go Install
 
 ```bash
-go install github.com/xynogen/oc-go-cc/cmd/ogc@latest
+go install github.com/xynogen/ogc/cmd/ogc@latest
 ```
 
 ### Build from Source
 
 ```bash
-git clone https://github.com/xynogen/oc-go-cc.git
-cd oc-go-cc
+git clone https://github.com/xynogen/ogc.git
+cd ogc
 make build
-
-# Binary is at bin/oc-go-cc
 # Optionally install to $GOPATH/bin
 make install
 ```
 
 ### Download a Release Binary
 
-Download the latest release for your platform from the [Releases page](https://github.com/xynogen/oc-go-cc/releases):
+Download the latest release for your platform from the [Releases page](https://github.com/xynogen/ogc/releases):
 
 | Platform | File |
 |----------|------|
-| macOS (Apple Silicon) | `oc-go-cc_darwin-arm64` |
-| macOS (Intel) | `oc-go-cc_darwin-amd64` |
-| Linux (x86_64) | `oc-go-cc_linux-amd64` |
-| Linux (ARM64) | `oc-go-cc_linux-arm64` |
-| Windows (x86_64) | `oc-go-cc_windows-amd64.exe` |
-| Windows (ARM64) | `oc-go-cc_windows-arm64.exe` |
+| macOS (Apple Silicon) | `ogc_darwin-arm64` |
+| macOS (Intel) | `ogc_darwin-amd64` |
+| Linux (x86_64) | `ogc_linux-amd64` |
+| Linux (ARM64) | `ogc_linux-arm64` |
+| Windows (x86_64) | `ogc_windows-amd64.exe` |
+| Windows (ARM64) | `ogc_windows-arm64.exe` |
 
 ```bash
 # Example: macOS Apple Silicon
-curl -L -o oc-go-cc https://github.com/xynogen/oc-go-cc/releases/latest/download/oc-go-cc_darwin-arm64
-chmod +x oc-go-cc
-sudo mv oc-go-cc /usr/local/bin/
+curl -L -o ogc https://github.com/xynogen/ogc/releases/latest/download/ogc_darwin-arm64
+chmod +x ogc
+sudo mv ogc /usr/local/bin/
 ```
 
 ### Requirements
@@ -75,7 +73,7 @@ sudo mv oc-go-cc /usr/local/bin/
 ogc init
 ```
 
-Creates a default config at `~/.config/oc-go-cc/config.json`.
+Creates a default config at `~/.config/ogc/config.json`.
 
 ### 2. Set Your API Key and Backend URL
 
@@ -98,7 +96,7 @@ ogc serve
 You'll see output like:
 
 ```
-Starting oc-go-cc v0.1.0
+Starting ogc v0.1.0
 Listening on 127.0.0.1:3456
 Forwarding to: https://your-openai-compatible-endpoint/v1/chat/completions
 
@@ -117,7 +115,7 @@ ogc serve --background
 ogc serve -b
 ```
 
-This starts the server as a background daemon and returns immediately. Logs are written to `~/.config/oc-go-cc/oc-go-cc.log`.
+This starts the server as a background daemon and returns immediately. Logs are written to `~/.config/ogc/ogc.log`.
 
 #### Auto-start on Login
 
@@ -154,20 +152,20 @@ export ANTHROPIC_AUTH_TOKEN=unused
 claude
 ```
 
-That's it. Claude Code will now route all requests through oc-go-cc to your configured backend.
+That's it. Claude Code will now route all requests through ogc to your configured backend.
 
 ## How It Works
 
 ```
 ┌─────────────┐     Anthropic API      ┌─────────────┐     OpenAI API          ┌──────────────────────┐
-│  Claude Code ├──────────────────────►│  oc-go-cc    ├────────────────────────►│  Any OpenAI-compatible│
+│  Claude Code ├──────────────────────►│  ogc         ├────────────────────────►│  Any OpenAI-compatible│
 │  (CLI)       │  POST /v1/messages   │  (Proxy)     │  /v1/chat/completions  │  backend              │
 │              │◄──────────────────────┤              │◄────────────────────────┤                      │
 └─────────────┘   Anthropic SSE        └─────────────┘   OpenAI SSE             └──────────────────────┘
 ```
 
 1. Claude Code sends a request in [Anthropic Messages API](https://docs.anthropic.com/en/api/messages) format
-2. oc-go-cc parses the request, counts tokens, and selects a model via routing rules
+2. ogc parses the request, counts tokens, and selects a model via routing rules
 3. The request is transformed to [OpenAI Chat Completions](https://platform.openai.com/docs/api-reference/chat) format
 4. The transformed request is sent to your configured endpoint
 5. The response (streaming or non-streaming) is transformed back to Anthropic format
@@ -190,7 +188,7 @@ That's it. Claude Code will now route all requests through oc-go-cc to your conf
 
 ### Config File
 
-Location: `~/.config/oc-go-cc/config.json`
+Location: `~/.config/ogc/config.json`
 
 Override with `OGC_CONFIG` environment variable.
 
@@ -262,7 +260,7 @@ Environment variables override config file values. Config values also support `$
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `OGC_API_KEY` | API key for your backend (**required**) | — |
-| `OGC_CONFIG` | Custom config file path | `~/.config/oc-go-cc/config.json` |
+| `OGC_CONFIG` | Custom config file path | `~/.config/ogc/config.json` |
 | `OGC_HOST` | Proxy listen host | `127.0.0.1` |
 | `OGC_PORT` | Proxy listen port | `3456` |
 | `OGC_OPENAI_BASE` | Full URL to your OpenAI-compatible `/v1/chat/completions` endpoint | `https://opencode.ai/zen/go/v1/chat/completions` |
@@ -324,7 +322,7 @@ Quick reference for OpenCode Go models:
 
 > **💡 Tip:** The cost column shows approximate requests per 5-hour block ($12). Qwen3.5 Plus gives you ~10x more requests than GLM-5.1!
 
-> **⚠️ Important:** MiniMax M2.5 and M2.7 use the **Anthropic-compatible** `/v1/messages` endpoint natively. oc-go-cc automatically routes these models to the correct endpoint and skips the OpenAI transformation, so they work seamlessly with Claude Code. See [MODELS.md](MODELS.md) for details.
+> **⚠️ Important:** MiniMax M2.5 and M2.7 use the **Anthropic-compatible** `/v1/messages` endpoint natively. ogc automatically routes these models to the correct endpoint and skips the OpenAI transformation, so they work seamlessly with Claude Code. See [MODELS.md](MODELS.md) for details.
 
 ## CLI Commands
 
@@ -481,7 +479,7 @@ make dist
 
 ## Credits
 
-This project is a fork of [oc-go-cc](https://github.com/samueltuyizere/oc-go-cc) by [samueltuyizere](https://github.com/samueltuyizere). All core ideas, architecture, and original implementation belong to them.
+This project is a fork of [ogc](https://github.com/samueltuyizere/ogc) by [samueltuyizere](https://github.com/samueltuyizere). All core ideas, architecture, and original implementation belong to them.
 
 ## License
 

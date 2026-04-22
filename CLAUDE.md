@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-make build   # Build binary to bin/oc-go-cc
+make build   # Build binary to bin/ogc
 make run     # Run without building
 make test    # Run tests with race detector
 make lint    # go vet + test
@@ -18,30 +18,27 @@ Run a single test: `go test ./internal/router/ -v`
 
 ## Architecture
 
-**Purpose:** oc-go-cc is a proxy server that sits between Claude Code and OpenCode Go. It intercepts Anthropic API requests, transforms them to OpenAI Chat Completions format, forwards them to OpenCode Go, and transforms responses back to Anthropic SSE.
+**Purpose:** ogc is a proxy server that sits between Claude Code and any OpenAI-compatible API endpoint. It intercepts Anthropic API requests, transforms them to OpenAI Chat Completions format, forwards them to your configured endpoint, and transforms responses back to Anthropic SSE.
 
-**Model routing is config-driven, not code-driven.** Models are defined in `~/.config/oc-go-cc/config.json` — adding a new model does not require code changes (except for `IsAnthropicModel()` if the new model uses the Anthropic endpoint). The router in `internal/router/` selects models by matching request content against scenario patterns defined in `scenarios.go`.
+**Config-driven model routing.** You define models and their endpoints in `~/.config/ogc/config.json`. The `model_mapping` section maps Claude model names to your backend models. No code changes needed to add/change models.
+
+**Key features:**
+- Supports ANY OpenAI-compatible API (OpenCode Go, LM Studio, Groq, Cloudflare, etc.)
+- Configurable endpoints per model
+- Per-model fallback chains for reliability
+- Circuit breaker per model (3 failures = 30s skip)
 
 **Two API endpoints:**
-- OpenAI endpoint (`/v1/chat/completions`) — used by most models (GLM, Kimi, MiMo, Qwen)
-- Anthropic endpoint (`/v1/messages`) — used only by MiniMax models
+- OpenAI endpoint (`/v1/chat/completions`) — standard for most models
+- Anthropic endpoint (`/v1/messages`) — for models expecting Anthropic format (e.g., MiniMax)
 
-`internal/client/opencode.go` routes by model ID via `IsAnthropicModel()`.
-
-**Scenario detection priority** (`internal/router/scenarios.go`):
-1. Long Context (>60K tokens) → MiniMax (1M context)
-2. Complex (architectural patterns, tool operations) → GLM-5.1
-3. Think (reasoning keywords in system prompt) → GLM-5
-4. Background (simple read-only ops, no tools) → Qwen3.5 Plus
-5. Default → Kimi K2.6
-
-For streaming, the router downgrades to fast models (Qwen3.6 Plus) for better TTFT.
+`internal/client/opencode.go` routes by model ID via `IsAnthropicModel()` to determine which endpoint to use.
 
 **Polymorphic field handling:** Anthropic's `system` and `content` fields accept both strings and arrays. `pkg/types/` uses `json.RawMessage` with accessor methods (`SystemText()`, `ContentBlocks()`) to handle both formats.
 
 ## Key Files
 
-- `cmd/oc-go-cc/main.go` — CLI entry point (cobra). Default config template is generated here.
+- `cmd/ogc/main.go` — CLI entry point (cobra). Default config template is generated here.
 - `internal/config/` — Config types and JSON loader with `${VAR}` env interpolation.
 - `internal/transformer/` — Request/response format conversion (Anthropic ↔ OpenAI).
 - `internal/router/fallback.go` — Circuit breaker per model (3 failures = 30s skip).
