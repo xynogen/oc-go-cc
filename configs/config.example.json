@@ -1,5 +1,5 @@
 {
-  "api_key": "${OC_GO_CC_API_KEY}",
+  "api_key": "${OGC_API_KEY}",
   "host": "127.0.0.1",
   "port": 3456,
 

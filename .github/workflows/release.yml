@@ -221,7 +221,7 @@ jobs:
                      oc-go-cc init
 
                   2. Set your OpenCode Go API key:
-                     export OC_GO_CC_API_KEY=sk-opencode-your-key
+                     export OGC_API_KEY=sk-opencode-your-key
 
                   3. Start the proxy:
                      oc-go-cc serve

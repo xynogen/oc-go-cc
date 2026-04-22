@@ -69,7 +69,7 @@ func serveCmd() *cobra.Command {
 
 			// Override config path if provided.
 			if configPath != "" {
-				os.Setenv("OC_GO_CC_CONFIG", configPath)
+				os.Setenv("OGC_CONFIG", configPath)
 			}
 
 			cfg, err := config.Load()
@@ -235,7 +235,7 @@ func validateCmd() *cobra.Command {
 		Short: "Validate configuration file",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if configPath != "" {
-				os.Setenv("OC_GO_CC_CONFIG", configPath)
+				os.Setenv("OGC_CONFIG", configPath)
 			}
 
 			cfg, err := config.Load()
@@ -358,7 +358,7 @@ func maskString(s string, visible int) string {
 // Model selection is controlled via model_mapping (map Claude Code model directly to target model ID).
 func getDefaultConfig() string {
 	return `{
-  "api_key": "${OC_GO_CC_API_KEY}",
+  "api_key": "${OGC_API_KEY}",
   "host": "127.0.0.1",
   "port": 3456,
   "models": {
