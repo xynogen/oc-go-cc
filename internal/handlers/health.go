@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"oc-go-cc/internal/metrics"
-	"oc-go-cc/internal/router"
-	"oc-go-cc/internal/token"
+	"github.com/xynogen/oc-go-cc/internal/metrics"
+	"github.com/xynogen/oc-go-cc/internal/router"
+	"github.com/xynogen/oc-go-cc/internal/token"
 )
 
 // HealthHandler handles health checks and token counting endpoints.

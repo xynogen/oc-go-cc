@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"oc-go-cc/pkg/types"
+	"github.com/xynogen/oc-go-cc/pkg/types"
 )
 
 // CollectAnthropicStream reads an Anthropic-format SSE stream and assembles a MessageResponse.
