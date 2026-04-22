@@ -25,7 +25,7 @@ var envVarPattern = regexp.MustCompile(`\$\{([A-Za-z0-9_]+)\}`)
 
 // Load reads configuration from a JSON file and applies environment variable overrides.
 // Config path resolution:
-//  1. OC_GO_CC_CONFIG env var (explicit override)
+//  1. OGC_CONFIG env var (explicit override)
 //  2. ~/.config/oc-go-cc/config.json (default)
 func Load() (*Config, error) {
 	configPath := resolveConfigPath()
@@ -47,7 +47,7 @@ func Load() (*Config, error) {
 
 // resolveConfigPath determines which config file to load.
 func resolveConfigPath() string {
-	if path := os.Getenv("OC_GO_CC_CONFIG"); path != "" {
+	if path := os.Getenv("OGC_CONFIG"); path != "" {
 		return path
 	}
 	return expandHome(defaultConfigPath)
@@ -98,21 +98,21 @@ func interpolateEnvVars(s string) string {
 
 // applyEnvOverrides applies environment variable overrides to the config.
 func applyEnvOverrides(cfg *Config) {
-	if v := os.Getenv("OC_GO_CC_API_KEY"); v != "" {
+	if v := os.Getenv("OGC_API_KEY"); v != "" {
 		cfg.APIKey = v
 	}
-	if v := os.Getenv("OC_GO_CC_HOST"); v != "" {
+	if v := os.Getenv("OGC_HOST"); v != "" {
 		cfg.Host = v
 	}
-	if v := os.Getenv("OC_GO_CC_PORT"); v != "" {
+	if v := os.Getenv("OGC_PORT"); v != "" {
 		if port, err := strconv.Atoi(v); err == nil {
 			cfg.Port = port
 		}
 	}
-	if v := os.Getenv("OC_GO_CC_OPENCODE_URL"); v != "" {
+	if v := os.Getenv("OGC_OPENAI_BASE"); v != "" {
 		cfg.OpenCodeGo.BaseURL = v
 	}
-	if v := os.Getenv("OC_GO_CC_LOG_LEVEL"); v != "" {
+	if v := os.Getenv("OGC_LOG_LEVEL"); v != "" {
 		cfg.Logging.Level = v
 	}
 }
@@ -142,7 +142,7 @@ func applyDefaults(cfg *Config) {
 // validate checks that all required configuration fields are present.
 func validate(cfg *Config) error {
 	if cfg.APIKey == "" {
-		return fmt.Errorf("api_key is required (set via config file or OC_GO_CC_API_KEY env var)")
+		return fmt.Errorf("api_key is required (set via config file or OGC_API_KEY env var)")
 	}
 	return nil
 }

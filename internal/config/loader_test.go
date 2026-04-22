@@ -28,8 +28,8 @@ func TestLoadJSON(t *testing.T) {
 		t.Fatalf("failed to write test config: %v", err)
 	}
 
-	os.Setenv("OC_GO_CC_CONFIG", cfgPath)
-	defer os.Unsetenv("OC_GO_CC_CONFIG")
+	os.Setenv("OGC_CONFIG", cfgPath)
+	defer os.Unsetenv("OGC_CONFIG")
 
 	cfg, err := Load()
 	if err != nil {
@@ -68,8 +68,8 @@ func TestLoadMissingAPIKey(t *testing.T) {
 		t.Fatalf("failed to write test config: %v", err)
 	}
 
-	os.Setenv("OC_GO_CC_CONFIG", cfgPath)
-	defer os.Unsetenv("OC_GO_CC_CONFIG")
+	os.Setenv("OGC_CONFIG", cfgPath)
+	defer os.Unsetenv("OGC_CONFIG")
 
 	_, err := Load()
 	if err == nil {
@@ -86,19 +86,19 @@ func TestEnvOverrides(t *testing.T) {
 		t.Fatalf("failed to write test config: %v", err)
 	}
 
-	os.Setenv("OC_GO_CC_CONFIG", cfgPath)
-	os.Setenv("OC_GO_CC_API_KEY", "env-key")
-	os.Setenv("OC_GO_CC_HOST", "env-host")
-	os.Setenv("OC_GO_CC_PORT", "9999")
-	os.Setenv("OC_GO_CC_OPENCODE_URL", "https://env-url/v1")
-	os.Setenv("OC_GO_CC_LOG_LEVEL", "warn")
+	os.Setenv("OGC_CONFIG", cfgPath)
+	os.Setenv("OGC_API_KEY", "env-key")
+	os.Setenv("OGC_HOST", "env-host")
+	os.Setenv("OGC_PORT", "9999")
+	os.Setenv("OGC_OPENAI_BASE", "https://env-url/v1")
+	os.Setenv("OGC_LOG_LEVEL", "warn")
 	defer func() {
-		os.Unsetenv("OC_GO_CC_CONFIG")
-		os.Unsetenv("OC_GO_CC_API_KEY")
-		os.Unsetenv("OC_GO_CC_HOST")
-		os.Unsetenv("OC_GO_CC_PORT")
-		os.Unsetenv("OC_GO_CC_OPENCODE_URL")
-		os.Unsetenv("OC_GO_CC_LOG_LEVEL")
+		os.Unsetenv("OGC_CONFIG")
+		os.Unsetenv("OGC_API_KEY")
+		os.Unsetenv("OGC_HOST")
+		os.Unsetenv("OGC_PORT")
+		os.Unsetenv("OGC_OPENAI_BASE")
+		os.Unsetenv("OGC_LOG_LEVEL")
 	}()
 
 	cfg, err := Load()
@@ -133,8 +133,8 @@ func TestDefaults(t *testing.T) {
 		t.Fatalf("failed to write test config: %v", err)
 	}
 
-	os.Setenv("OC_GO_CC_CONFIG", cfgPath)
-	defer os.Unsetenv("OC_GO_CC_CONFIG")
+	os.Setenv("OGC_CONFIG", cfgPath)
+	defer os.Unsetenv("OGC_CONFIG")
 
 	cfg, err := Load()
 	if err != nil {

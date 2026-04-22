@@ -1,16 +1,17 @@
 # oc-go-cc
 
-A Go CLI proxy that lets you use your [OpenCode Go](https://opencode.ai/docs/go/) subscription with [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
+A Go CLI proxy that lets you use any [OpenAI-compatible API](https://platform.openai.com/docs/api-reference/chat) with [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
-`oc-go-cc` sits between Claude Code and OpenCode Go, intercepting Anthropic API requests, transforming them to OpenAI format, and forwarding them to OpenCode Go's endpoint. Claude Code thinks it's talking to Anthropic — but your requests go to affordable open models instead.
+`oc-go-cc` sits between Claude Code and your chosen backend, intercepting Anthropic API requests, transforming them to OpenAI Chat Completions format, and forwarding them to your endpoint. Claude Code thinks it's talking to Anthropic — but your requests go to whichever models and provider you configure.
 
 ## Why?
 
-OpenCode Go gives you access to powerful open coding models for **$5/month** (then $10/month). This proxy makes those models work seamlessly with Claude Code's interface — no patches, no forks, just set two environment variables and go.
+Claude Code is locked to the Anthropic API format. This proxy breaks that lock: point it at any OpenAI-compatible endpoint — [OpenCode Go](https://opencode.ai/docs/go/), a local [Ollama](https://ollama.ai) instance, [OpenRouter](https://openrouter.ai), or your own deployment — and Claude Code just works with it. No patches, no forks, just set two environment variables and go.
 
 ## Features
 
 - **Transparent Proxy** — Claude Code sends Anthropic-format requests, proxy transforms to OpenAI format and back
+- **Any OpenAI-compatible Backend** — Works with OpenCode Go, Ollama, OpenRouter, vLLM, or any `/v1/chat/completions` endpoint
 - **Model Routing** — Automatically routes to different models based on context (default, thinking, long context, background)
 - **Fallback Chains** — If a model fails, automatically tries the next one in your configured chain
 - **Circuit Breaker** — Tracks model health and skips failing models to avoid latency spikes
@@ -63,7 +64,7 @@ sudo mv oc-go-cc /usr/local/bin/
 
 ### Requirements
 
-- An [OpenCode Go](https://opencode.ai/auth) subscription and API key
+- An API key for your chosen backend (if required)
 - Go 1.21+ (only needed if building from source)
 
 ## Quick Start
@@ -76,11 +77,17 @@ oc-go-cc init
 
 Creates a default config at `~/.config/oc-go-cc/config.json`.
 
-### 2. Set Your API Key
+### 2. Set Your API Key and Backend URL
 
 ```bash
-export OGC_API_KEY=sk-opencode-your-key-here
+export OGC_API_KEY=your-api-key-here
+export OGC_OPENAI_BASE=https://your-openai-compatible-endpoint/v1/chat/completions
 ```
+
+Examples:
+- **OpenCode Go**: `https://opencode.ai/zen/go/v1/chat/completions`
+- **Ollama**: `http://localhost:11434/v1/chat/completions`
+- **OpenRouter**: `https://openrouter.ai/api/v1/chat/completions`
 
 ### 3. Start the Proxy
 
@@ -93,7 +100,7 @@ You'll see output like:
 ```
 Starting oc-go-cc v0.1.0
 Listening on 127.0.0.1:3456
-Forwarding to: https://opencode.ai/zen/go/v1/chat/completions
+Forwarding to: https://your-openai-compatible-endpoint/v1/chat/completions
 
 Configure Claude Code with:
   export ANTHROPIC_BASE_URL=http://127.0.0.1:3456
@@ -147,22 +154,22 @@ export ANTHROPIC_AUTH_TOKEN=unused
 claude
 ```
 
-That's it. Claude Code will now route all requests through oc-go-cc to OpenCode Go.
+That's it. Claude Code will now route all requests through oc-go-cc to your configured backend.
 
 ## How It Works
 
 ```
-┌─────────────┐     Anthropic API      ┌─────────────┐     OpenAI API       ┌─────────────┐
-│  Claude Code ├──────────────────────►│  oc-go-cc    ├────────────────────►│  OpenCode Go │
-│  (CLI)       │  POST /v1/messages   │  (Proxy)     │  /chat/completions  │  (Upstream)  │
-│              │◄──────────────────────┤              │◄────────────────────┤              │
-└─────────────┘   Anthropic SSE        └─────────────┘   OpenAI SSE          └─────────────┘
+┌─────────────┐     Anthropic API      ┌─────────────┐     OpenAI API          ┌──────────────────────┐
+│  Claude Code ├──────────────────────►│  oc-go-cc    ├────────────────────────►│  Any OpenAI-compatible│
+│  (CLI)       │  POST /v1/messages   │  (Proxy)     │  /v1/chat/completions  │  backend              │
+│              │◄──────────────────────┤              │◄────────────────────────┤                      │
+└─────────────┘   Anthropic SSE        └─────────────┘   OpenAI SSE             └──────────────────────┘
 ```
 
 1. Claude Code sends a request in [Anthropic Messages API](https://docs.anthropic.com/en/api/messages) format
 2. oc-go-cc parses the request, counts tokens, and selects a model via routing rules
 3. The request is transformed to [OpenAI Chat Completions](https://platform.openai.com/docs/api-reference/chat) format
-4. The transformed request is sent to OpenCode Go's endpoint
+4. The transformed request is sent to your configured endpoint
 5. The response (streaming or non-streaming) is transformed back to Anthropic format
 6. Claude Code receives the response as if it came from Anthropic directly
 
@@ -254,11 +261,11 @@ Environment variables override config file values. Config values also support `$
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `OGC_API_KEY` | OpenCode Go API key (**required**) | — |
+| `OGC_API_KEY` | API key for your backend (**required**) | — |
 | `OGC_CONFIG` | Custom config file path | `~/.config/oc-go-cc/config.json` |
 | `OGC_HOST` | Proxy listen host | `127.0.0.1` |
 | `OGC_PORT` | Proxy listen port | `3456` |
-| `OGC_OPENCODE_URL` | OpenCode Go API endpoint | `https://opencode.ai/zen/go/v1/chat/completions` |
+| `OGC_OPENAI_BASE` | OpenAI-compatible backend base URL | `https://opencode.ai/zen/go/v1/chat/completions` |
 | `OGC_LOG_LEVEL` | Log level: `debug`, `info`, `warn`, `error` | `info` |
 
 ### Model Routing
@@ -298,9 +305,9 @@ Each model also has a **circuit breaker** that tracks consecutive failures. Afte
 
 ### Available Models
 
-See [MODELS.md](MODELS.md) for **detailed model capabilities, costs, and routing recommendations**.
+The default config ships with [OpenCode Go](https://opencode.ai/docs/go/) models as an example. See [MODELS.md](MODELS.md) for details.
 
-Quick reference:
+Quick reference for OpenCode Go models:
 
 | Model ID | Quality | Context | Cost (req/5hr) | Best For |
 |----------|---------|---------|----------------|----------|
@@ -333,7 +340,7 @@ oc-go-cc autostart disable  Disable auto-start on login
 oc-go-cc autostart status   Check autostart status
 oc-go-cc init               Create default configuration file
 oc-go-cc validate           Validate configuration file
-oc-go-cc models             List available OpenCode Go models
+oc-go-cc models             List configured models
 oc-go-cc --version          Show version
 ```
 
@@ -368,8 +375,8 @@ export OGC_LOG_LEVEL=debug
 All models in the fallback chain returned errors. Check:
 
 1. Your API key is valid: `oc-go-cc validate`
-2. You haven't exceeded your [usage limits](https://opencode.ai/auth)
-3. The OpenCode Go service is reachable: `curl -H "Authorization: Bearer $OGC_API_KEY" https://opencode.ai/zen/go/v1/models`
+2. You haven't exceeded your backend's usage limits
+3. Your backend is reachable: `curl -H "Authorization: Bearer $OGC_API_KEY" $OGC_OPENAI_BASE`
 
 ### Connection Refused
 
@@ -404,7 +411,7 @@ OGC_LOG_LEVEL=debug oc-go-cc serve
 This logs:
 
 - Raw Anthropic request body from Claude Code
-- Transformed OpenAI request sent to OpenCode Go
+- Transformed OpenAI request sent to your backend
 - Raw OpenAI response received
 - SSE stream events during streaming
 
@@ -430,7 +437,7 @@ internal/
 │   ├── response.go             OpenAI → Anthropic response transformation
 │   └── stream.go               Real-time SSE stream transformation
 ├── client/
-│   └── opencode.go             OpenCode Go HTTP client
+│   └── opencode.go             HTTP client for the OpenAI-compatible backend
 └── token/
     └── counter.go              Tiktoken token counter (cl100k_base)
 pkg/types/
@@ -443,7 +450,7 @@ configs/
 ### Key Design Decisions
 
 - **Polymorphic field handling**: Anthropic's `system` and `content` fields accept both strings and arrays. We use `json.RawMessage` with accessor methods (`SystemText()`, `ContentBlocks()`) to handle both formats correctly.
-- **Real-time stream proxying**: SSE events are transformed in-flight, not buffered. This means Claude Code sees responses as they arrive from OpenCode Go.
+- **Real-time stream proxying**: SSE events are transformed in-flight, not buffered. This means Claude Code sees responses as they arrive from the backend.
 - **Circuit breaker per model**: Each model gets its own circuit breaker. After 3 consecutive failures, the model is skipped for 30 seconds, then tested again.
 - **Environment variable interpolation**: Config values like `"${OGC_API_KEY}"` are resolved at load time, so you never need to put secrets in the config file.
 
