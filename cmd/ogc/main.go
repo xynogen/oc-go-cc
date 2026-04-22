@@ -401,8 +401,8 @@ func getDefaultConfig() string {
     ]
   },
   "upstream": {
-    "base_url": "https://opencode.ai/zen/go/v1/chat/completions",
-    "anthropic_base_url": "https://opencode.ai/zen/go/v1/messages",
+    "base_url": "https://opencode.ai/zen/go/v1",
+    "anthropic_base_url": "https://opencode.ai/zen/go/v1",
     "timeout_ms": 300000
   },
   "logging": {

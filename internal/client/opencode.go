@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/xynogen/oc-go-cc/internal/config"
@@ -45,11 +46,11 @@ func NewClient(cfg config.UpstreamConfig, apiKey string) *Client {
 
 	return &Client{
 		openAIConfig: EndpointConfig{
-			BaseURL: cfg.BaseURL,
+			BaseURL: resolveURL(cfg.BaseURL, "/chat/completions"),
 			APIKey:  apiKey,
 		},
 		anthropicConfig: EndpointConfig{
-			BaseURL: cfg.AnthropicBaseURL,
+			BaseURL: resolveURL(cfg.AnthropicBaseURL, "/messages"),
 			APIKey:  apiKey,
 		},
 		httpClient: &http.Client{
@@ -114,6 +115,16 @@ func (c *Client) ChatCompletion(
 	}
 
 	return resp, nil
+}
+
+// resolveURL normalises a base URL to always end with the given path suffix.
+// Accepts both base-only (http://host/v1) and already-full (http://host/v1/chat/completions).
+func resolveURL(base, suffix string) string {
+	base = strings.TrimRight(base, "/")
+	if strings.HasSuffix(base, suffix) {
+		return base
+	}
+	return base + suffix
 }
 
 // ChatCompletionNonStreaming sends a non-streaming request and returns the full parsed response.

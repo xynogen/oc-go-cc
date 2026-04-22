@@ -14,8 +14,8 @@ const (
 	defaultConfigPath       = "~/.config/oc-go-cc/config.json"
 	defaultHost             = "127.0.0.1"
 	defaultPort             = 3456
-	defaultBaseURL          = "https://opencode.ai/zen/go/v1/chat/completions"
-	defaultAnthropicBaseURL = "https://opencode.ai/zen/go/v1/messages"
+	defaultBaseURL          = "https://opencode.ai/zen/go/v1"
+	defaultAnthropicBaseURL = "https://opencode.ai/zen/go/v1"
 	defaultTimeoutMs        = 300000
 	defaultLogLevel         = "info"
 )
