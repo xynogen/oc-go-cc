@@ -110,7 +110,7 @@ func applyEnvOverrides(cfg *Config) {
 		}
 	}
 	if v := os.Getenv("OGC_OPENAI_BASE"); v != "" {
-		cfg.OpenCodeGo.BaseURL = v
+		cfg.Upstream.BaseURL = v
 	}
 	if v := os.Getenv("OGC_LOG_LEVEL"); v != "" {
 		cfg.Logging.Level = v
@@ -125,14 +125,14 @@ func applyDefaults(cfg *Config) {
 	if cfg.Port == 0 {
 		cfg.Port = defaultPort
 	}
-	if cfg.OpenCodeGo.BaseURL == "" {
-		cfg.OpenCodeGo.BaseURL = defaultBaseURL
+	if cfg.Upstream.BaseURL == "" {
+		cfg.Upstream.BaseURL = defaultBaseURL
 	}
-	if cfg.OpenCodeGo.AnthropicBaseURL == "" {
-		cfg.OpenCodeGo.AnthropicBaseURL = defaultAnthropicBaseURL
+	if cfg.Upstream.AnthropicBaseURL == "" {
+		cfg.Upstream.AnthropicBaseURL = defaultAnthropicBaseURL
 	}
-	if cfg.OpenCodeGo.TimeoutMs == 0 {
-		cfg.OpenCodeGo.TimeoutMs = defaultTimeoutMs
+	if cfg.Upstream.TimeoutMs == 0 {
+		cfg.Upstream.TimeoutMs = defaultTimeoutMs
 	}
 	if cfg.Logging.Level == "" {
 		cfg.Logging.Level = defaultLogLevel

@@ -8,14 +8,10 @@ type Config struct {
 	Port         int                      `json:"port"`
 	Models       map[string]ModelConfig   `json:"models"`
 	Fallbacks    map[string][]ModelConfig `json:"fallbacks"`
-	OpenCodeGo   OpenCodeGoConfig         `json:"opencode_go"`
+	Upstream     UpstreamConfig           `json:"upstream"`
 	Logging      LoggingConfig            `json:"logging"`
 	ModelMapping map[string]string        `json:"model_mapping"`
 }
-
-// ModelMapping maps Claude Code model patterns to OpenCode Go model IDs.
-// Example: "claude-sonnet-*" -> "kimi-k2.6"
-// The target model ID must exist in Models config.
 
 // ModelConfig defines routing rules for a specific model.
 type ModelConfig struct {
@@ -26,8 +22,8 @@ type ModelConfig struct {
 	ContextThreshold int     `json:"context_threshold"`
 }
 
-// OpenCodeGoConfig holds the upstream OpenCode Go API settings.
-type OpenCodeGoConfig struct {
+// UpstreamConfig holds the upstream API settings.
+type UpstreamConfig struct {
 	BaseURL          string `json:"base_url"`
 	AnthropicBaseURL string `json:"anthropic_base_url"`
 	TimeoutMs        int    `json:"timeout_ms"`

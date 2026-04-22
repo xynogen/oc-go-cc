@@ -14,7 +14,7 @@ func TestLoadJSON(t *testing.T) {
 		"api_key": "test-key-123",
 		"host": "0.0.0.0",
 		"port": 8080,
-		"opencode_go": {
+		"upstream": {
 			"base_url": "https://custom.url/v1",
 			"timeout_ms": 60000
 		},
@@ -45,11 +45,11 @@ func TestLoadJSON(t *testing.T) {
 	if cfg.Port != 8080 {
 		t.Errorf("Port = %d, want %d", cfg.Port, 8080)
 	}
-	if cfg.OpenCodeGo.BaseURL != "https://custom.url/v1" {
-		t.Errorf("BaseURL = %q, want %q", cfg.OpenCodeGo.BaseURL, "https://custom.url/v1")
+	if cfg.Upstream.BaseURL != "https://custom.url/v1" {
+		t.Errorf("BaseURL = %q, want %q", cfg.Upstream.BaseURL, "https://custom.url/v1")
 	}
-	if cfg.OpenCodeGo.TimeoutMs != 60000 {
-		t.Errorf("TimeoutMs = %d, want %d", cfg.OpenCodeGo.TimeoutMs, 60000)
+	if cfg.Upstream.TimeoutMs != 60000 {
+		t.Errorf("TimeoutMs = %d, want %d", cfg.Upstream.TimeoutMs, 60000)
 	}
 	if cfg.Logging.Level != "debug" {
 		t.Errorf("LogLevel = %q, want %q", cfg.Logging.Level, "debug")
@@ -115,8 +115,8 @@ func TestEnvOverrides(t *testing.T) {
 	if cfg.Port != 9999 {
 		t.Errorf("Port = %d, want %d", cfg.Port, 9999)
 	}
-	if cfg.OpenCodeGo.BaseURL != "https://env-url/v1" {
-		t.Errorf("BaseURL = %q, want %q", cfg.OpenCodeGo.BaseURL, "https://env-url/v1")
+	if cfg.Upstream.BaseURL != "https://env-url/v1" {
+		t.Errorf("BaseURL = %q, want %q", cfg.Upstream.BaseURL, "https://env-url/v1")
 	}
 	if cfg.Logging.Level != "warn" {
 		t.Errorf("LogLevel = %q, want %q", cfg.Logging.Level, "warn")
@@ -147,11 +147,11 @@ func TestDefaults(t *testing.T) {
 	if cfg.Port != defaultPort {
 		t.Errorf("Port = %d, want %d", cfg.Port, defaultPort)
 	}
-	if cfg.OpenCodeGo.BaseURL != defaultBaseURL {
-		t.Errorf("BaseURL = %q, want %q", cfg.OpenCodeGo.BaseURL, defaultBaseURL)
+	if cfg.Upstream.BaseURL != defaultBaseURL {
+		t.Errorf("BaseURL = %q, want %q", cfg.Upstream.BaseURL, defaultBaseURL)
 	}
-	if cfg.OpenCodeGo.TimeoutMs != defaultTimeoutMs {
-		t.Errorf("TimeoutMs = %d, want %d", cfg.OpenCodeGo.TimeoutMs, defaultTimeoutMs)
+	if cfg.Upstream.TimeoutMs != defaultTimeoutMs {
+		t.Errorf("TimeoutMs = %d, want %d", cfg.Upstream.TimeoutMs, defaultTimeoutMs)
 	}
 	if cfg.Logging.Level != defaultLogLevel {
 		t.Errorf("LogLevel = %q, want %q", cfg.Logging.Level, defaultLogLevel)
