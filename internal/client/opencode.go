@@ -17,8 +17,8 @@ import (
 
 // Client handles communication with upstream API.
 type Client struct {
-	openAIConfig    EndpointConfig
-	anthropicConfig EndpointConfig
+	openAIConfig     EndpointConfig
+	anthropicConfig  EndpointConfig
 	httpClient      *http.Client
 }
 
@@ -60,19 +60,14 @@ func NewClient(cfg config.UpstreamConfig, apiKey string) *Client {
 	}
 }
 
-// getEndpoint returns the OpenAI endpoint config.
-func (c *Client) getEndpoint(_ string) EndpointConfig {
-	return c.openAIConfig
-}
-
-// ChatCompletion sends a chat completion request to the upstream API.
+// ChatCompletion sends a chat completion request to the OpenAI endpoint.
 // Returns the raw HTTP response for the caller to handle (streaming or body read).
 func (c *Client) ChatCompletion(
 	ctx context.Context,
-	modelID string,
+	_ string,
 	req *types.ChatCompletionRequest,
 ) (*http.Response, error) {
-	endpoint := c.getEndpoint(modelID)
+	endpoint := c.openAIConfig
 
 	body, err := json.Marshal(req)
 	if err != nil {
