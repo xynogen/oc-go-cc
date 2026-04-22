@@ -7,6 +7,12 @@ import (
 )
 
 func TestLoadJSON(t *testing.T) {
+	// Must unset OGC env vars to prevent pollution in tests
+	os.Unsetenv("OGC_API_KEY")
+	os.Unsetenv("OGC_OPENAI_BASE")
+	os.Unsetenv("OGC_HOST")
+	os.Unsetenv("OGC_PORT")
+
 	dir := t.TempDir()
 	cfgPath := filepath.Join(dir, "config.json")
 
@@ -60,6 +66,14 @@ func TestLoadJSON(t *testing.T) {
 }
 
 func TestLoadMissingAPIKey(t *testing.T) {
+	// Must unset OGC env vars to prevent pollution in tests
+	os.Unsetenv("OGC_API_KEY")
+	os.Unsetenv("OGC_OPENAI_BASE")
+	os.Unsetenv("OGC_ANTHROPIC_BASE")
+	os.Unsetenv("OGC_HOST")
+	os.Unsetenv("OGC_PORT")
+	os.Unsetenv("OGC_LOG_LEVEL")
+
 	dir := t.TempDir()
 	cfgPath := filepath.Join(dir, "config.json")
 
