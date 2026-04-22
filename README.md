@@ -17,6 +17,7 @@ Claude Code is locked to the Anthropic API format. This proxy breaks that lock: 
 - **Circuit Breaker** — Tracks model health and skips failing models to avoid latency spikes
 - **Real-time Streaming** — Full SSE streaming with live OpenAI → Anthropic format transformation
 - **Tool Calling** — Proper Anthropic tool_use/tool_result ↔ OpenAI function calling translation
+- **Provider Support** — Route to OpenAI (`/v1/chat/completions`) or Anthropic (`/v1/messages`) endpoints per model
 - **Token Counting** — Uses tiktoken (cl100k_base) for accurate token counting and context threshold detection
 - **JSON Configuration** — Flexible config file with environment variable overrides and `${VAR}` interpolation
 - **Background Mode** — Run as daemon detached from terminal
@@ -217,7 +218,8 @@ Override with `OGC_CONFIG` environment variable.
   },
 
   "upstream": {
-    "base_url": "https://api.openai.com/v1/chat/completions",
+    "base_url": "https://api.openai.com/v1",
+    "anthropic_base_url": "https://api.anthropic.com",
     "timeout_ms": 300000
   },
 
@@ -250,6 +252,26 @@ The `model_mapping` section maps Claude Code model names to your configured mode
 | `claude-opus` | Your preferred model | Primary model |
 | `claude-sonnet` | Your preferred model | Balanced choice |
 | `claude-haiku` | Your preferred model | Fast/cheap option |
+
+### Provider
+
+The `provider` field in each model config determines the endpoint:
+
+| Provider | Endpoint | Use Case |
+| -------- | -------- | -------- |
+| `openai` (default) | `/v1/chat/completions` | OpenAI-compatible APIs |
+| `anthropic` | `/v1/messages` | Anthropic-compatible APIs |
+
+```json
+{
+  "models": {
+    "minimax": {
+      "provider": "anthropic",
+      "model_id": "MiniMax-Text-01"
+    }
+  }
+}
+```
 
 ### Fallback Chains
 
