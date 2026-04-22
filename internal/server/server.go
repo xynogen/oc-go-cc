@@ -11,12 +11,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/xynogen/oc-go-cc/internal/client"
-	"github.com/xynogen/oc-go-cc/internal/config"
-	"github.com/xynogen/oc-go-cc/internal/handlers"
-	"github.com/xynogen/oc-go-cc/internal/metrics"
-	"github.com/xynogen/oc-go-cc/internal/router"
-	"github.com/xynogen/oc-go-cc/internal/token"
+	"github.com/xynogen/ogc/internal/client"
+	"github.com/xynogen/ogc/internal/config"
+	"github.com/xynogen/ogc/internal/handlers"
+	"github.com/xynogen/ogc/internal/metrics"
+	"github.com/xynogen/ogc/internal/router"
+	"github.com/xynogen/ogc/internal/token"
 )
 
 // Server represents the proxy server.

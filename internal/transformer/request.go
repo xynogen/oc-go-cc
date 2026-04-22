@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/xynogen/oc-go-cc/internal/config"
-	"github.com/xynogen/oc-go-cc/pkg/types"
+	"github.com/xynogen/ogc/internal/config"
+	"github.com/xynogen/ogc/pkg/types"
 )
 
 // RequestTransformer converts Anthropic requests to OpenAI format.

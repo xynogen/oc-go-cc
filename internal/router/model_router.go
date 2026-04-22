@@ -5,7 +5,7 @@ package router
 import (
 	"fmt"
 
-	"github.com/xynogen/oc-go-cc/internal/config"
+	"github.com/xynogen/ogc/internal/config"
 )
 
 // ModelRouter handles model selection based on scenarios.

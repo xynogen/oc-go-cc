@@ -3,7 +3,7 @@ package router
 import (
 	"testing"
 
-	"github.com/xynogen/oc-go-cc/internal/config"
+	"github.com/xynogen/ogc/internal/config"
 )
 
 func TestHasComplexPattern_UserMessage(t *testing.T) {

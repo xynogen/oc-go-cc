@@ -11,14 +11,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xynogen/oc-go-cc/internal/client"
-	"github.com/xynogen/oc-go-cc/internal/config"
-	"github.com/xynogen/oc-go-cc/internal/metrics"
-	"github.com/xynogen/oc-go-cc/internal/middleware"
-	"github.com/xynogen/oc-go-cc/internal/router"
-	"github.com/xynogen/oc-go-cc/internal/token"
-	"github.com/xynogen/oc-go-cc/internal/transformer"
-	"github.com/xynogen/oc-go-cc/pkg/types"
+	"github.com/xynogen/ogc/internal/client"
+	"github.com/xynogen/ogc/internal/config"
+	"github.com/xynogen/ogc/internal/metrics"
+	"github.com/xynogen/ogc/internal/middleware"
+	"github.com/xynogen/ogc/internal/router"
+	"github.com/xynogen/ogc/internal/token"
+	"github.com/xynogen/ogc/internal/transformer"
+	"github.com/xynogen/ogc/pkg/types"
 )
 
 // MessagesHandler handles /v1/messages requests.

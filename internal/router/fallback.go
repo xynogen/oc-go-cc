@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xynogen/oc-go-cc/internal/config"
+	"github.com/xynogen/ogc/internal/config"
 )
 
 // CircuitState represents the state of a circuit breaker.
