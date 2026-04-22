@@ -12,7 +12,7 @@ import (
 const (
 	AppName     = "oc-go-cc"
 	ConfigDir   = ".config/oc-go-cc"
-	LaunchAgent = "com.opencode.oc-go-cc"
+	LaunchAgent = "com.xynogen.oc-go-cc"
 )
 
 // Paths holds well-known directories and files for the app.
@@ -20,7 +20,7 @@ type Paths struct {
 	ConfigDir  string // ~/.config/oc-go-cc
 	PIDFile    string // ~/.config/oc-go-cc/oc-go-cc.pid
 	LogFile    string // ~/.config/oc-go-cc/oc-go-cc.log
-	PlistPath  string // ~/Library/LaunchAgents/com.opencode.oc-go-cc.plist
+	PlistPath  string // ~/Library/LaunchAgents/com.xynogen.oc-go-cc.plist
 	BinaryPath string // absolute path to the running executable
 }
 

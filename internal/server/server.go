@@ -42,14 +42,14 @@ func NewServer(cfg *config.Config) (*Server, error) {
 	// Create metrics
 	metrics := metrics.New()
 
-	openCodeClient := client.NewOpenCodeClient(cfg.OpenCodeGo, cfg.APIKey)
+	upstreamClient := client.NewClient(cfg.Upstream, cfg.APIKey)
 	modelRouter := router.NewModelRouter(cfg)
 	fallbackHandler := router.NewFallbackHandler(logger, 3, 30*time.Second)
 
 	// Create handlers.
 	messagesHandler := handlers.NewMessagesHandler(
 		cfg,
-		openCodeClient,
+		upstreamClient,
 		modelRouter,
 		fallbackHandler,
 		tokenCounter,
@@ -87,7 +87,7 @@ func (s *Server) Start() error {
 	s.logger.Info("starting oc-go-cc proxy",
 		"host", s.config.Host,
 		"port", s.config.Port,
-		"base_url", s.config.OpenCodeGo.BaseURL,
+		"base_url", s.config.Upstream.BaseURL,
 	)
 
 	// Graceful shutdown.

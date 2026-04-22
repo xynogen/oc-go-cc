@@ -24,10 +24,10 @@ var version = "dev"
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   appName,
-		Short: "Proxy Claude Code requests to OpenCode Go API",
-		Long: `oc-go-cc is a CLI proxy tool that allows you to use your OpenCode Go
+		Short: "Proxy Claude Code requests to upstream API",
+		Long: `oc-go-cc is a CLI proxy tool that allows you to use your upstream
 subscription with Claude Code. It intercepts Claude Code's Anthropic API requests,
-transforms them to OpenAI format, and forwards them to OpenCode Go.
+transforms them to OpenAI format, and forwards them to upstream.
 
 Configuration is stored at ~/.config/oc-go-cc/config.json`,
 		Version: version,
@@ -121,7 +121,7 @@ func serveCmd() *cobra.Command {
 
 			fmt.Printf("Starting %s v%s\n", appName, version)
 			fmt.Printf("Listening on %s:%d\n", cfg.Host, cfg.Port)
-			fmt.Printf("Forwarding to: %s\n", cfg.OpenCodeGo.BaseURL)
+			fmt.Printf("Forwarding to: %s\n", cfg.Upstream.BaseURL)
 			fmt.Println()
 			fmt.Println("Configure Claude Code with:")
 			fmt.Printf("  export ANTHROPIC_BASE_URL=http://%s:%d\n", cfg.Host, cfg.Port)
@@ -220,7 +220,7 @@ func initCmd() *cobra.Command {
 			}
 
 			fmt.Printf("Created default config at %s\n", configPath)
-			fmt.Println("Edit the file and add your OpenCode Go API key.")
+			fmt.Println("Edit the file and add your upstream API key.")
 			return nil
 		},
 	}
@@ -247,7 +247,7 @@ func validateCmd() *cobra.Command {
 			fmt.Printf("  Host: %s\n", cfg.Host)
 			fmt.Printf("  Port: %d\n", cfg.Port)
 			fmt.Printf("  API Key: %s...\n", maskString(cfg.APIKey, 8))
-			fmt.Printf("  Base URL: %s\n", cfg.OpenCodeGo.BaseURL)
+			fmt.Printf("  Base URL: %s\n", cfg.Upstream.BaseURL)
 			fmt.Printf("  Models configured: %d\n", len(cfg.Models))
 			fmt.Printf("  Model mappings: %d\n", len(cfg.ModelMapping))
 			fmt.Printf("  Fallback chains: %d\n", len(cfg.Fallbacks))
@@ -263,9 +263,9 @@ func validateCmd() *cobra.Command {
 func modelsCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "models",
-		Short: "List available OpenCode Go models",
+		Short: "List available upstream models",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Available OpenCode Go models:")
+			fmt.Println("Available upstream models:")
 			fmt.Println()
 			fmt.Println("  Model ID           Endpoint Type")
 			fmt.Println("  ─────────────────────────────────────────")
@@ -363,19 +363,19 @@ func getDefaultConfig() string {
   "port": 3456,
   "models": {
     "minimax-m2.7": {
-      "provider": "opencode-go",
+      "provider": "openai",
       "model_id": "minimax-m2.7",
       "temperature": 0.7,
       "max_tokens": 65536
     },
     "minimax-m2.5": {
-      "provider": "opencode-go",
+      "provider": "openai",
       "model_id": "minimax-m2.5",
       "temperature": 0.7,
       "max_tokens": 65536
     },
     "qwen3.5-plus": {
-      "provider": "opencode-go",
+      "provider": "openai",
       "model_id": "qwen3.5-plus",
       "temperature": 0.7,
       "max_tokens": 32768
@@ -388,19 +388,19 @@ func getDefaultConfig() string {
   },
   "fallbacks": {
     "minimax-m2.7": [
-      { "provider": "opencode-go", "model_id": "minimax-m2.5" },
-      { "provider": "opencode-go", "model_id": "glm-5.1" }
+      { "provider": "openai", "model_id": "minimax-m2.5" },
+      { "provider": "openai", "model_id": "glm-5.1" }
     ],
     "minimax-m2.5": [
-      { "provider": "opencode-go", "model_id": "glm-5.1" },
-      { "provider": "opencode-go", "model_id": "qwen3.5-plus" }
+      { "provider": "openai", "model_id": "glm-5.1" },
+      { "provider": "openai", "model_id": "qwen3.5-plus" }
     ],
     "qwen3.5-plus": [
-      { "provider": "opencode-go", "model_id": "qwen3.6-plus" },
-      { "provider": "opencode-go", "model_id": "kimi-k2.6" }
+      { "provider": "openai", "model_id": "qwen3.6-plus" },
+      { "provider": "openai", "model_id": "kimi-k2.6" }
     ]
   },
-  "opencode_go": {
+  "upstream": {
     "base_url": "https://opencode.ai/zen/go/v1/chat/completions",
     "anthropic_base_url": "https://opencode.ai/zen/go/v1/messages",
     "timeout_ms": 300000

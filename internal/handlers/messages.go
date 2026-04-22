@@ -24,7 +24,7 @@ import (
 // MessagesHandler handles /v1/messages requests.
 type MessagesHandler struct {
 	config              *config.Config
-	client              *client.OpenCodeClient
+	client              *client.Client
 	modelRouter         *router.ModelRouter
 	fallbackHandler     *router.FallbackHandler
 	requestTransformer  *transformer.RequestTransformer
@@ -68,7 +68,7 @@ func (w *responseWriter) Flush() {
 // NewMessagesHandler creates a new messages handler.
 func NewMessagesHandler(
 	cfg *config.Config,
-	openCodeClient *client.OpenCodeClient,
+	upstreamClient *client.Client,
 	modelRouter *router.ModelRouter,
 	fallbackHandler *router.FallbackHandler,
 	tokenCounter *token.Counter,
@@ -76,7 +76,7 @@ func NewMessagesHandler(
 ) *MessagesHandler {
 	return &MessagesHandler{
 		config:              cfg,
-		client:              openCodeClient,
+		client:              upstreamClient,
 		modelRouter:         modelRouter,
 		fallbackHandler:     fallbackHandler,
 		requestTransformer:  transformer.NewRequestTransformer(),

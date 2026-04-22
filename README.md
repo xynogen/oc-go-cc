@@ -204,25 +204,25 @@ Override with `OGC_CONFIG` environment variable.
 
   "models": {
     "default": {
-      "provider": "opencode-go",
+      "provider": "openai",
       "model_id": "kimi-k2.6",
       "temperature": 0.7,
       "max_tokens": 4096
     },
     "background": {
-      "provider": "opencode-go",
+      "provider": "openai",
       "model_id": "qwen3.5-plus",
       "temperature": 0.5,
       "max_tokens": 2048
     },
     "think": {
-      "provider": "opencode-go",
+      "provider": "openai",
       "model_id": "glm-5.1",
       "temperature": 0.7,
       "max_tokens": 8192
     },
     "long_context": {
-      "provider": "opencode-go",
+      "provider": "openai",
       "model_id": "minimax-m2.7",
       "temperature": 0.7,
       "max_tokens": 16384,
@@ -232,18 +232,18 @@ Override with `OGC_CONFIG` environment variable.
 
   "fallbacks": {
     "default": [
-      { "provider": "opencode-go", "model_id": "glm-5" },
-      { "provider": "opencode-go", "model_id": "qwen3.6-plus" }
+      { "provider": "openai", "model_id": "glm-5" },
+      { "provider": "openai", "model_id": "qwen3.6-plus" }
     ],
     "think": [
-      { "provider": "opencode-go", "model_id": "glm-5" }
+      { "provider": "openai", "model_id": "glm-5" }
     ],
     "long_context": [
-      { "provider": "opencode-go", "model_id": "minimax-m2.5" }
+      { "provider": "openai", "model_id": "minimax-m2.5" }
     ]
   },
 
-  "opencode_go": {
+  "upstream": {
     "base_url": "https://opencode.ai/zen/go/v1/chat/completions",
     "timeout_ms": 300000
   },
