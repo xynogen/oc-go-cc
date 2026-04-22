@@ -61,8 +61,8 @@ func NewClient(cfg config.UpstreamConfig, apiKey string) *Client {
 }
 
 // IsAnthropicModel returns true if the model requires the Anthropic endpoint.
+// MiniMax models use the Anthropic SDK package which requires /v1/messages endpoint.
 func IsAnthropicModel(modelID string) bool {
-	// MiniMax models use Anthropic endpoint
 	return modelID == "minimax-m2.5" || modelID == "minimax-m2.7"
 }
 
@@ -189,11 +189,10 @@ func (c *Client) SendAnthropicRequest(
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	// Set headers
+	// Set headers - x-api-key is required for OpenCode Go's /v1/messages endpoint
 	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("Authorization", "Bearer "+endpoint.APIKey)
-	// Incase upstream expects x-api-key instead
 	httpReq.Header.Set("x-api-key", endpoint.APIKey)
+	httpReq.Header.Set("anthropic-version", "2023-06-01")
 
 	// Add streaming header if requested
 	if stream {

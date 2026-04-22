@@ -14,8 +14,8 @@ const (
 	defaultConfigPath       = "~/.config/ogc/config.json"
 	defaultHost             = "127.0.0.1"
 	defaultPort             = 3456
-	defaultBaseURL          = "https://opencode.ai/zen/go/v1"
-	defaultAnthropicBaseURL = "https://opencode.ai/zen/go/v1"
+	defaultBaseURL          = "https://api.openai.com/v1"
+	defaultAnthropicBaseURL = "https://api.openai.com/v1"
 	defaultTimeoutMs        = 300000
 	defaultLogLevel         = "info"
 )

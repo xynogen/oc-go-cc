@@ -2,8 +2,6 @@
 
 Guide to configuring models for ogc with any OpenAI-compatible API provider.
 
-**Source:** Your API provider's documentation (OpenCode Go, LM Studio, Groq, Cloudflare, etc.)
-
 ## Quick Configuration
 
 ```json
@@ -33,26 +31,6 @@ The `model_mapping` section maps Claude model names to your backend models:
 | `claude-opus` | Your preferred model | Primary model |
 | `claude-sonnet` | Your preferred model | Balanced choice |
 | `claude-haiku` | Your preferred model | Fast/cheap option |
-
-## Provider-Specific Notes
-
-### OpenCode Go
-
-Models and endpoints:
-- **OpenAI endpoint:** `https://opencode.ai/zen/go/v1/chat/completions`
-- **Anthropic endpoint:** `https://opencode.ai/zen/go/v1/messages`
-
-MiniMax models use the Anthropic endpoint natively.
-
-### LM Studio
-
-- Use your local server URL (e.g., `http://localhost:11434/v1/chat/completions`)
-- Model IDs depend on your loaded model
-
-### Groq
-
-- **Base URL:** `https://api.groq.com/openai/v1/chat/completions`
-- Use their model IDs (e.g., `llama-3.1-70b-versatile`)
 
 ## See Also
 

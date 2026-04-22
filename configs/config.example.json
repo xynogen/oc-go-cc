@@ -46,8 +46,8 @@
   },
 
   "upstream": {
-    "base_url": "https://opencode.ai/zen/go/v1/chat/completions",
-    "anthropic_base_url": "https://opencode.ai/zen/go/v1/messages",
+    "base_url": "https://api.openai.com/v1/chat/completions",
+    "anthropic_base_url": "https://api.openai.com/v1/chat/completions",
     "timeout_ms": 300000
   },
 

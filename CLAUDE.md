@@ -28,12 +28,6 @@ Run a single test: `go test ./internal/router/ -v`
 - Per-model fallback chains for reliability
 - Circuit breaker per model (3 failures = 30s skip)
 
-**Two API endpoints:**
-- OpenAI endpoint (`/v1/chat/completions`) — standard for most models
-- Anthropic endpoint (`/v1/messages`) — for models expecting Anthropic format (e.g., MiniMax)
-
-`internal/client/opencode.go` routes by model ID via `IsAnthropicModel()` to determine which endpoint to use.
-
 **Polymorphic field handling:** Anthropic's `system` and `content` fields accept both strings and arrays. `pkg/types/` uses `json.RawMessage` with accessor methods (`SystemText()`, `ContentBlocks()`) to handle both formats.
 
 ## Key Files

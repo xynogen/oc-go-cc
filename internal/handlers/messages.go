@@ -252,11 +252,9 @@ func (h *MessagesHandler) handleStreaming(
 		// Check if this is an Anthropic-native model (MiniMax)
 		if client.IsAnthropicModel(model.ModelID) {
 			// For MiniMax models, send raw Anthropic request to Anthropic endpoint
-			// But we need to replace the model name in the raw body
 			modelBody := replaceModelInRawBody(rawBody, model.ModelID)
 			if err := h.handleAnthropicStreaming(ctx, rw, modelBody, model.ModelID); err != nil {
 				cancel()
-				// Check if this was a client disconnect
 				if clientCtx.Err() == context.Canceled {
 					h.logger.Info("client disconnected during anthropic stream")
 					return
@@ -460,11 +458,9 @@ func (h *MessagesHandler) handleNonStreaming(
 		ctx,
 		modelChain,
 		func(ctx context.Context, model config.ModelConfig) ([]byte, error) {
-			// Check if this is an Anthropic-native model (MiniMax)
 			if client.IsAnthropicModel(model.ModelID) {
 				return h.executeAnthropicRequest(ctx, rawBody, model)
 			}
-			// Otherwise use OpenAI transformation
 			return h.executeOpenAIRequest(ctx, anthropicReq, model)
 		},
 	)

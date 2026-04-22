@@ -6,7 +6,7 @@ A Go CLI proxy that lets you use any [OpenAI-compatible API](https://platform.op
 
 ## Why?
 
-Claude Code is locked to the Anthropic API format. This proxy breaks that lock: point it at any OpenAI-compatible endpoint — [OpenCode Go](https://opencode.ai/docs/go/), a local [Ollama](https://ollama.ai) instance, [OpenRouter](https://openrouter.ai), or your own deployment — and Claude Code just works with it. No patches, no forks, just set two environment variables and go.
+Claude Code is locked to the Anthropic API format. This proxy breaks that lock: point it at any OpenAI-compatible endpoint — [OpenAI](https://platform.openai.com/docs/api-reference/chat), a local [Ollama](https://ollama.ai) instance, [OpenRouter](https://openrouter.ai), [LiteLLM](https://docs.litellm.ai/), or your own deployment — and Claude Code just works with it. No patches, no forks, just set two environment variables and go.
 
 ## Features
 
@@ -83,9 +83,10 @@ export OGC_OPENAI_BASE=https://your-openai-compatible-endpoint/v1/chat/completio
 ```
 
 Examples:
-- **OpenCode Go**: `https://opencode.ai/zen/go/v1/chat/completions`
+- **OpenAI**: `https://api.openai.com/v1/chat/completions`
 - **Ollama**: `http://localhost:11434/v1/chat/completions`
 - **OpenRouter**: `https://openrouter.ai/api/v1/chat/completions`
+- **LiteLLM**: `http://localhost:4000/v1/chat/completions`
 
 ### 3. Start the Proxy
 
@@ -203,46 +204,20 @@ Override with `OGC_CONFIG` environment variable.
   "models": {
     "default": {
       "provider": "openai",
-      "model_id": "kimi-k2.6",
+      "model_id": "gpt-4o",
       "temperature": 0.7,
       "max_tokens": 4096
-    },
-    "background": {
-      "provider": "openai",
-      "model_id": "qwen3.5-plus",
-      "temperature": 0.5,
-      "max_tokens": 2048
-    },
-    "think": {
-      "provider": "openai",
-      "model_id": "glm-5.1",
-      "temperature": 0.7,
-      "max_tokens": 8192
-    },
-    "long_context": {
-      "provider": "openai",
-      "model_id": "minimax-m2.7",
-      "temperature": 0.7,
-      "max_tokens": 16384,
-      "context_threshold": 60000
     }
   },
 
-  "fallbacks": {
-    "default": [
-      { "provider": "openai", "model_id": "glm-5" },
-      { "provider": "openai", "model_id": "qwen3.6-plus" }
-    ],
-    "think": [
-      { "provider": "openai", "model_id": "glm-5" }
-    ],
-    "long_context": [
-      { "provider": "openai", "model_id": "minimax-m2.5" }
-    ]
+  "model_mapping": {
+    "claude-opus": "default",
+    "claude-sonnet": "default",
+    "claude-haiku": "default"
   },
 
   "upstream": {
-    "base_url": "https://opencode.ai/zen/go/v1/chat/completions",
+    "base_url": "https://api.openai.com/v1/chat/completions",
     "timeout_ms": 300000
   },
 
@@ -263,33 +238,18 @@ Environment variables override config file values. Config values also support `$
 | `OGC_CONFIG` | Custom config file path | `~/.config/ogc/config.json` |
 | `OGC_HOST` | Proxy listen host | `127.0.0.1` |
 | `OGC_PORT` | Proxy listen port | `3456` |
-| `OGC_OPENAI_BASE` | Full URL to your OpenAI-compatible `/v1/chat/completions` endpoint | `https://opencode.ai/zen/go/v1/chat/completions` |
+| `OGC_OPENAI_BASE` | Full URL to your OpenAI-compatible `/v1/chat/completions` endpoint | `https://api.openai.com/v1/chat/completions` |
 | `OGC_LOG_LEVEL` | Log level: `debug`, `info`, `warn`, `error` | `info` |
 
-### Model Routing
+### Model Mapping
 
-The proxy automatically detects the type of request and routes to the appropriate model based on context size and content analysis:
+The `model_mapping` section maps Claude Code model names to your configured models:
 
-| Scenario | Trigger | Model | Why |
-|----------|---------|-------|-----|
-| **Long Context** | >60K tokens | MiniMax M2.7 | 1M context window vs 128-256K for others |
-| **Complex** | "architect", "refactor", "complex" in system prompt | GLM-5.1 | Best reasoning & architectural understanding |
-| **Think** | "think", "plan", "reason" in system prompt | GLM-5 | Good reasoning, cheaper than GLM-5.1 |
-| **Background** | "read file", "grep", "list directory" | Qwen3.5 Plus | Cheapest (~10K req/5hr), perfect for simple ops |
-| **Default** | Everything else | Kimi K2.6 | Best balance of quality & cost (~1.8K req/5hr) |
-
-**📖 See [MODELS.md](MODELS.md) for detailed model capabilities, costs, and routing recommendations.**
-
-#### Routing in Detail:
-
-| Scenario | Trigger | Config Key | Default Model |
-|----------|---------|------------|---------------|
-| **Default** | Standard chat | `models.default` | `kimi-k2.6` |
-| **Think** | System prompt contains "think", "plan", "reason"; or thinking content blocks | `models.think` | `glm-5.1` |
-| **Long Context** | Token count exceeds `context_threshold` | `models.long_context` | `minimax-m2.7` |
-| **Background** | File read, directory list, grep patterns | `models.background` | `qwen3.5-plus` |
-
-Routing priority: **Long Context** → **Think** → **Background** → **Default**
+| Claude Model | Maps To | Notes |
+| ------------ | ------- | ----- |
+| `claude-opus` | Your preferred model | Primary model |
+| `claude-sonnet` | Your preferred model | Balanced choice |
+| `claude-haiku` | Your preferred model | Fast/cheap option |
 
 ### Fallback Chains
 
@@ -300,29 +260,6 @@ Primary model → Fallback 1 → Fallback 2 → ... → Error (all failed)
 ```
 
 Each model also has a **circuit breaker** that tracks consecutive failures. After 3 failures, the circuit opens and that model is skipped for 30 seconds, then tested again (half-open state).
-
-### Available Models
-
-The default config ships with [OpenCode Go](https://opencode.ai/docs/go/) models as an example. See [MODELS.md](MODELS.md) for details.
-
-Quick reference for OpenCode Go models:
-
-| Model ID | Quality | Context | Cost (req/5hr) | Best For |
-|----------|---------|---------|----------------|----------|
-| `glm-5.1` | ★★★★★ | 200K | ~880 | Complex architecture, difficult tasks |
-| `glm-5` | ★★★★☆ | 200K | ~1,150 | High-quality coding, refactoring |
-| `kimi-k2.6` | ★★★★★ | 256K | ~1,850 | **Default** - best balance |
-| `kimi-k2.5` | ★★★★☆ | 256K | ~1,850 | Fallback - solid quality |
-| `mimo-v2-pro` | ★★★★☆ | 128K | ~1,290 | Code completion, generation |
-| `mimo-v2-omni` | ★★★☆☆ | 256K | ~2,150 | Fast prototyping |
-| `qwen3.6-plus` | ★★★☆☆ | 128K | ~3,300 | Cost-effective general coding |
-| `minimax-m2.7` | ★★★☆☆ | **1M** | ~3,400 | **Long context specialist** |
-| `minimax-m2.5` | ★★☆☆☆ | **1M** | ~6,300 | Long context on a budget |
-| `qwen3.5-plus` | ★★☆☆☆ | 128K | ~10,200 | **Cheapest** - background tasks |
-
-> **💡 Tip:** The cost column shows approximate requests per 5-hour block ($12). Qwen3.5 Plus gives you ~10x more requests than GLM-5.1!
-
-> **⚠️ Important:** MiniMax M2.5 and M2.7 use the **Anthropic-compatible** `/v1/messages` endpoint natively. ogc automatically routes these models to the correct endpoint and skips the OpenAI transformation, so they work seamlessly with Claude Code. See [MODELS.md](MODELS.md) for details.
 
 ## CLI Commands
 
