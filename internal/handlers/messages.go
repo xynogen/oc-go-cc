@@ -354,30 +354,34 @@ func forceStreamTrue(rawBody json.RawMessage) json.RawMessage {
 
 // replaceModelInRawBody replaces the model field in raw JSON body with the actual model ID.
 // This is needed for Anthropic endpoint which validates the model name.
+// Uses JSON parsing so it tolerates whitespace and key ordering.
 func replaceModelInRawBody(rawBody json.RawMessage, modelID string) json.RawMessage {
-	// Simple string replacement - find "model":"..." and replace with "model":"actual-model"
-	bodyStr := string(rawBody)
-
-	// Try to find and replace the model field
-	// Pattern: "model":"claude-..." or "model":"any-model-name"
-	if idx := strings.Index(bodyStr, `"model":"`); idx != -1 {
-		start := idx + len(`"model":"`)
-		if end := strings.Index(bodyStr[start:], `"`); end != -1 {
-			oldModel := bodyStr[start : start+end]
-			// Replace the model value
-			newBody := bodyStr[:start] + modelID + bodyStr[start+end:]
-			slog.Debug("replaced model in request body",
-				"old_model", oldModel,
-				"new_model", modelID,
-				"success", true)
-			return json.RawMessage(newBody)
-		}
+	var body map[string]json.RawMessage
+	if err := json.Unmarshal(rawBody, &body); err != nil {
+		slog.Warn("could not parse request body, using original",
+			"error", err,
+			"body_preview", string(rawBody)[:min(len(rawBody), 200)])
+		return rawBody
 	}
 
-	slog.Warn("could not find model field in request body, using original",
-		"body_preview", bodyStr[:min(len(bodyStr), 200)])
-	// If we couldn't parse, return original (will likely fail upstream but that's ok)
-	return rawBody
+	encoded, err := json.Marshal(modelID)
+	if err != nil {
+		return rawBody
+	}
+
+	oldModel := string(body["model"])
+	body["model"] = encoded
+
+	newBody, err := json.Marshal(body)
+	if err != nil {
+		slog.Warn("could not re-marshal request body, using original", "error", err)
+		return rawBody
+	}
+
+	slog.Debug("replaced model in request body",
+		"old_model", oldModel,
+		"new_model", modelID)
+	return json.RawMessage(newBody)
 }
 
 func min(a, b int) int {
