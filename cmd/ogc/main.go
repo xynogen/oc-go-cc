@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	appName     = "oc-go-cc"
-	pidFileName = "oc-go-cc.pid"
+	appName     = "ogc"
+	pidFileName = "ogc.pid"
 )
 
 // Version is set at build time via -ldflags "-X main.version=...".
@@ -25,9 +25,9 @@ func main() {
 	rootCmd := &cobra.Command{
 		Use:   appName,
 		Short: "Proxy Claude Code requests to upstream API",
-		Long: `oc-go-cc is a CLI proxy tool that allows you to use your upstream
-subscription with Claude Code. It intercepts Claude Code's Anthropic API requests,
-transforms them to OpenAI format, and forwards them to upstream.
+		Long: `ogc is a CLI proxy tool that allows you to use any OpenAI-compatible backend
+with Claude Code. It intercepts Claude Code's Anthropic API requests,
+transforms them to OpenAI format, and forwards them to your configured endpoint.
 
 Configuration is stored at ~/.config/oc-go-cc/config.json`,
 		Version: version,

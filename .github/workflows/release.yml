@@ -218,13 +218,13 @@ jobs:
                 To get started with oc-go-cc:
 
                   1. Initialize configuration:
-                     oc-go-cc init
+                     ogc init
 
                   2. Set your OpenCode Go API key:
                      export OGC_API_KEY=sk-opencode-your-key
 
                   3. Start the proxy:
-                     oc-go-cc serve
+                     ogc serve
 
                   4. Configure Claude Code:
                      export ANTHROPIC_BASE_URL=http://127.0.0.1:3456

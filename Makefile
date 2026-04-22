@@ -3,8 +3,8 @@
 # Build variables
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 LDFLAGS = -X main.version=$(VERSION)
-BINARY = oc-go-cc
-CMD = ./cmd/oc-go-cc
+BINARY = ogc
+CMD = ./cmd/ogc
 
 # ── Development ────────────────────────────────────────────────────
 

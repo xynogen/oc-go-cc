@@ -27,7 +27,7 @@ Claude Code is locked to the Anthropic API format. This proxy breaks that lock: 
 ### Go Install
 
 ```bash
-go install github.com/xynogen/oc-go-cc/cmd/oc-go-cc@latest
+go install github.com/xynogen/oc-go-cc/cmd/ogc@latest
 ```
 
 ### Build from Source
@@ -72,7 +72,7 @@ sudo mv oc-go-cc /usr/local/bin/
 ### 1. Initialize Configuration
 
 ```bash
-oc-go-cc init
+ogc init
 ```
 
 Creates a default config at `~/.config/oc-go-cc/config.json`.
@@ -92,7 +92,7 @@ Examples:
 ### 3. Start the Proxy
 
 ```bash
-oc-go-cc serve
+ogc serve
 ```
 
 You'll see output like:
@@ -112,9 +112,9 @@ Configure Claude Code with:
 To run the proxy in the background (detached from terminal):
 
 ```bash
-oc-go-cc serve --background
+ogc serve --background
 # or
-oc-go-cc serve -b
+ogc serve -b
 ```
 
 This starts the server as a background daemon and returns immediately. Logs are written to `~/.config/oc-go-cc/oc-go-cc.log`.
@@ -124,19 +124,19 @@ This starts the server as a background daemon and returns immediately. Logs are 
 To start the proxy automatically when you log in:
 
 ```bash
-oc-go-cc autostart enable
+ogc autostart enable
 ```
 
 This creates a launchd plist on macOS. To disable:
 
 ```bash
-oc-go-cc autostart disable
+ogc autostart disable
 ```
 
 Check status:
 
 ```bash
-oc-go-cc autostart status
+ogc autostart status
 ```
 
 ### 4. Configure Claude Code
@@ -329,19 +329,19 @@ Quick reference for OpenCode Go models:
 ## CLI Commands
 
 ```
-oc-go-cc serve              Start the proxy server
-oc-go-cc serve -b          Start in background (detached from terminal)
-oc-go-cc serve --port 8080  Start on a custom port
-oc-go-cc serve --config /path/to/config.json  Use a custom config
-oc-go-cc stop               Stop the running proxy server
-oc-go-cc status             Check if the proxy is running
-oc-go-cc autostart enable   Enable auto-start on login
-oc-go-cc autostart disable  Disable auto-start on login
-oc-go-cc autostart status   Check autostart status
-oc-go-cc init               Create default configuration file
-oc-go-cc validate           Validate configuration file
-oc-go-cc models             List configured models
-oc-go-cc --version          Show version
+ogc serve              Start the proxy server
+ogc serve -b          Start in background (detached from terminal)
+ogc serve --port 8080  Start on a custom port
+ogc serve --config /path/to/config.json  Use a custom config
+ogc stop               Stop the running proxy server
+ogc status             Check if the proxy is running
+ogc autostart enable   Enable auto-start on login
+ogc autostart disable  Disable auto-start on login
+ogc autostart status   Check autostart status
+ogc init               Create default configuration file
+ogc validate           Validate configuration file
+ogc models             List configured models
+ogc --version          Show version
 ```
 
 ## API Endpoints
@@ -374,7 +374,7 @@ export OGC_LOG_LEVEL=debug
 
 All models in the fallback chain returned errors. Check:
 
-1. Your API key is valid: `oc-go-cc validate`
+1. Your API key is valid: `ogc validate`
 2. You haven't exceeded your backend's usage limits
 3. Your backend is reachable: `curl -H "Authorization: Bearer $OGC_API_KEY" $OGC_OPENAI_BASE`
 
@@ -383,7 +383,7 @@ All models in the fallback chain returned errors. Check:
 Make sure the proxy is running:
 
 ```bash
-oc-go-cc status
+ogc status
 ```
 
 And Claude Code is pointing to the right address:
@@ -405,7 +405,7 @@ The proxy transforms OpenAI SSE to Anthropic SSE in real-time. If streaming appe
 For maximum logging, run with debug level:
 
 ```bash
-OGC_LOG_LEVEL=debug oc-go-cc serve
+OGC_LOG_LEVEL=debug ogc serve
 ```
 
 This logs:
@@ -418,7 +418,7 @@ This logs:
 ## Architecture
 
 ```
-cmd/oc-go-cc/main.go           CLI entry point (cobra commands)
+cmd/ogc/main.go           CLI entry point (cobra commands)
 internal/
 ├── config/
 │   ├── config.go               Config types

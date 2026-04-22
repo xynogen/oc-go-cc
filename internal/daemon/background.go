@@ -25,7 +25,7 @@ func ForkIntoBackground(opts BackgroundOpts) error {
 		return fmt.Errorf("cannot create config directory: %w", err)
 	}
 
-	// Build args for nohup: nohup oc-go-cc serve --_daemonize [--config X] [--port N]
+	// Build args for nohup: nohup ogc serve --_daemonize [--config X] [--port N]
 	args := []string{"serve", "--_daemonize"}
 	if opts.ConfigPath != "" {
 		args = append(args, "--config", opts.ConfigPath)

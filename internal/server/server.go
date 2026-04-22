@@ -84,7 +84,7 @@ func NewServer(cfg *config.Config) (*Server, error) {
 
 // Start starts the server with graceful shutdown.
 func (s *Server) Start() error {
-	s.logger.Info("starting oc-go-cc proxy",
+	s.logger.Info("starting ogc proxy",
 		"host", s.config.Host,
 		"port", s.config.Port,
 		"base_url", s.config.Upstream.BaseURL,
