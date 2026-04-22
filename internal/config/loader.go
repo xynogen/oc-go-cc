@@ -14,8 +14,8 @@ const (
 	defaultConfigPath       = "~/.config/ogc/config.json"
 	defaultHost             = "127.0.0.1"
 	defaultPort             = 3456
-	defaultBaseURL          = "https://api.openai.com/v1"
-	defaultAnthropicBaseURL = "https://api.openai.com/v1"
+	defaultBaseURL          = "https://opencode.ai/zen/go/v1"
+	defaultAnthropicBaseURL = "https://opencode.ai/zen/go/v1"
 	defaultTimeoutMs        = 300000
 	defaultLogLevel         = "info"
 )
@@ -111,6 +111,9 @@ func applyEnvOverrides(cfg *Config) {
 	}
 	if v := os.Getenv("OGC_OPENAI_BASE"); v != "" {
 		cfg.Upstream.BaseURL = v
+	}
+	if v := os.Getenv("OGC_ANTHROPIC_BASE"); v != "" {
+		cfg.Upstream.AnthropicBaseURL = v
 	}
 	if v := os.Getenv("OGC_LOG_LEVEL"); v != "" {
 		cfg.Logging.Level = v

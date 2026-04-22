@@ -23,6 +23,7 @@ type ChatCompletionRequest struct {
 type ChatMessage struct {
 	Role       string     `json:"role"`
 	Content    string     `json:"content,omitempty"`
+	Reasoning  string     `json:"reasoning,omitempty"`  // extended-thinking models (Kimi, DeepSeek R1)
 	ToolCalls  []ToolCall `json:"tool_calls,omitempty"`
 	Name       string     `json:"name,omitempty"`
 	ToolCallID string     `json:"tool_call_id,omitempty"`

@@ -159,10 +159,11 @@ func (h *StreamHandler) processSSELine(
 		return nil
 	}
 
-	// Fast path: check if this is a content chunk without full JSON parsing
-	// Look for "delta":{"content":" pattern
-	if idx := strings.Index(data, `"delta":{"content":"`); idx != -1 {
-		// Extract content directly
+	// Fast path: extract content directly without full JSON parsing.
+	// Only applies when content is non-empty and the chunk has no reasoning field
+	// (which would require the full-JSON path below).
+	// Kimi/DeepSeek chunks carry "reasoning" instead of "content" — those fall through.
+	if idx := strings.Index(data, `"delta":{"content":"`); idx != -1 && !strings.Contains(data, `"reasoning":`) {
 		start := idx + len(`"delta":{"content":"`)
 		end := strings.Index(data[start:], `"`)
 		if end != -1 {
@@ -170,7 +171,6 @@ func (h *StreamHandler) processSSELine(
 			if content != "" {
 				if !*contentStarted {
 					*contentStarted = true
-					// Send content_block_start
 					startEvent := types.MessageEvent{
 						Type:  "content_block_start",
 						Index: contentIndex,
@@ -183,7 +183,6 @@ func (h *StreamHandler) processSSELine(
 					}
 				}
 
-				// Send content_block_delta
 				delta := types.Delta{
 					Type: "text_delta",
 					Text: content,
@@ -197,8 +196,8 @@ func (h *StreamHandler) processSSELine(
 					return ErrClientDisconnected
 				}
 				flusher.Flush()
+				return nil
 			}
-			return nil
 		}
 	}
 
@@ -240,8 +239,17 @@ func (h *StreamHandler) processSSELine(
 
 	choice := chunk.Choices[0]
 
-	// Handle text content deltas
-	if choice.Delta.Content != "" {
+	// Handle text content deltas.
+	// Extended-thinking models (Kimi, DeepSeek R1) stream their answer in
+	// choice.Delta.Reasoning before switching to choice.Delta.Content.
+	// We emit reasoning as text when content is absent so the client always
+	// receives a non-empty response even if the context window is tight.
+	textToken := choice.Delta.Content
+	if textToken == "" {
+		textToken = choice.Delta.Reasoning
+	}
+
+	if textToken != "" {
 		if !*contentStarted {
 			*contentStarted = true
 			startEvent := types.MessageEvent{
@@ -258,7 +266,7 @@ func (h *StreamHandler) processSSELine(
 
 		delta := types.Delta{
 			Type: "text_delta",
-			Text: choice.Delta.Content,
+			Text: textToken,
 		}
 		event := types.MessageEvent{
 			Type:  "content_block_delta",

@@ -142,6 +142,7 @@ func CollectOpenAIStream(body io.ReadCloser) (*types.ChatCompletionResponse, err
 
 	var resp types.ChatCompletionResponse
 	var contentBuf strings.Builder
+	var reasoningBuf strings.Builder
 	var finishReason string
 	toolCallMap := map[int]*types.ToolCall{}
 	var toolCallOrder []int
@@ -162,6 +163,7 @@ func CollectOpenAIStream(body io.ReadCloser) (*types.ChatCompletionResponse, err
 		Choices []struct {
 			Delta struct {
 				Content   string           `json:"content"`
+				Reasoning string           `json:"reasoning"`
 				ToolCalls []streamToolCall `json:"tool_calls"`
 			} `json:"delta"`
 			FinishReason string `json:"finish_reason"`
@@ -196,6 +198,7 @@ func CollectOpenAIStream(body io.ReadCloser) (*types.ChatCompletionResponse, err
 		if len(chunk.Choices) > 0 {
 			choice := chunk.Choices[0]
 			contentBuf.WriteString(choice.Delta.Content)
+			reasoningBuf.WriteString(choice.Delta.Reasoning)
 			if choice.FinishReason != "" {
 				finishReason = choice.FinishReason
 			}
@@ -233,10 +236,16 @@ func CollectOpenAIStream(body io.ReadCloser) (*types.ChatCompletionResponse, err
 		}
 	}
 
+	// Use reasoning as fallback when content is empty (extended-thinking models like Kimi).
+	finalContent := contentBuf.String()
+	if finalContent == "" {
+		finalContent = reasoningBuf.String()
+	}
+
 	resp.Choices = []types.Choice{{
 		Message: types.ChatMessage{
 			Role:      "assistant",
-			Content:   contentBuf.String(),
+			Content:   finalContent,
 			ToolCalls: toolCalls,
 		},
 		FinishReason: finishReason,

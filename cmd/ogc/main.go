@@ -389,8 +389,8 @@ func getDefaultConfig() string {
     ]
   },
   "upstream": {
-    "base_url": "https://api.openai.com/v1",
-    "anthropic_base_url": "https://api.openai.com/v1",
+    "base_url": "https://opencode.ai/zen/go/v1",
+    "anthropic_base_url": "https://opencode.ai/zen/go/v1",
     "timeout_ms": 300000
   },
   "logging": {

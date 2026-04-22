@@ -88,6 +88,7 @@ func (s *Server) Start() error {
 		"host", s.config.Host,
 		"port", s.config.Port,
 		"base_url", s.config.Upstream.BaseURL,
+		"anthropic_base_url", s.config.Upstream.AnthropicBaseURL,
 	)
 
 	// Graceful shutdown.
