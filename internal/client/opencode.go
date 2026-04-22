@@ -60,17 +60,8 @@ func NewClient(cfg config.UpstreamConfig, apiKey string) *Client {
 	}
 }
 
-// IsAnthropicModel returns true if the model requires the Anthropic endpoint.
-// MiniMax models use the Anthropic SDK package which requires /v1/messages endpoint.
-func IsAnthropicModel(modelID string) bool {
-	return modelID == "minimax-m2.5" || modelID == "minimax-m2.7"
-}
-
-// getEndpoint returns the appropriate endpoint config for a model.
-func (c *Client) getEndpoint(modelID string) EndpointConfig {
-	if IsAnthropicModel(modelID) {
-		return c.anthropicConfig
-	}
+// getEndpoint returns the OpenAI endpoint config.
+func (c *Client) getEndpoint(_ string) EndpointConfig {
 	return c.openAIConfig
 }
 

@@ -249,8 +249,7 @@ func (h *MessagesHandler) handleStreaming(
 		// Don't use r.Context() directly - it gets canceled when Claude Code retries.
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 
-		// Check if this is an Anthropic-native model (MiniMax)
-		if client.IsAnthropicModel(model.ModelID) {
+		if model.Provider == "anthropic" {
 			// For MiniMax models, send raw Anthropic request to Anthropic endpoint
 			modelBody := replaceModelInRawBody(rawBody, model.ModelID)
 			if err := h.handleAnthropicStreaming(ctx, rw, modelBody, model.ModelID); err != nil {
@@ -462,7 +461,7 @@ func (h *MessagesHandler) handleNonStreaming(
 		ctx,
 		modelChain,
 		func(ctx context.Context, model config.ModelConfig) ([]byte, error) {
-			if client.IsAnthropicModel(model.ModelID) {
+			if model.Provider == "anthropic" {
 				return h.executeAnthropicRequest(ctx, rawBody, model)
 			}
 			return h.executeOpenAIRequest(ctx, anthropicReq, model)
