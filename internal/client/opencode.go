@@ -14,8 +14,8 @@ import (
 	"github.com/xynogen/oc-go-cc/pkg/types"
 )
 
-// OpenCodeClient handles communication with OpenCode Go API.
-type OpenCodeClient struct {
+// Client handles communication with upstream API.
+type Client struct {
 	openAIConfig    EndpointConfig
 	anthropicConfig EndpointConfig
 	httpClient      *http.Client
@@ -27,8 +27,8 @@ type EndpointConfig struct {
 	APIKey  string
 }
 
-// NewOpenCodeClient creates a new OpenCode Go client.
-func NewOpenCodeClient(cfg config.OpenCodeGoConfig, apiKey string) *OpenCodeClient {
+// NewClient creates a new upstream client.
+func NewClient(cfg config.UpstreamConfig, apiKey string) *Client {
 	timeout := time.Duration(cfg.TimeoutMs) * time.Millisecond
 	if timeout == 0 {
 		timeout = 5 * time.Minute
@@ -43,7 +43,7 @@ func NewOpenCodeClient(cfg config.OpenCodeGoConfig, apiKey string) *OpenCodeClie
 		DisableKeepAlives:   false,
 	}
 
-	return &OpenCodeClient{
+	return &Client{
 		openAIConfig: EndpointConfig{
 			BaseURL: cfg.BaseURL,
 			APIKey:  apiKey,
@@ -66,16 +66,16 @@ func IsAnthropicModel(modelID string) bool {
 }
 
 // getEndpoint returns the appropriate endpoint config for a model.
-func (c *OpenCodeClient) getEndpoint(modelID string) EndpointConfig {
+func (c *Client) getEndpoint(modelID string) EndpointConfig {
 	if IsAnthropicModel(modelID) {
 		return c.anthropicConfig
 	}
 	return c.openAIConfig
 }
 
-// ChatCompletion sends a chat completion request to the OpenCode Go API.
+// ChatCompletion sends a chat completion request to the upstream API.
 // Returns the raw HTTP response for the caller to handle (streaming or body read).
-func (c *OpenCodeClient) ChatCompletion(
+func (c *Client) ChatCompletion(
 	ctx context.Context,
 	modelID string,
 	req *types.ChatCompletionRequest,
@@ -117,7 +117,7 @@ func (c *OpenCodeClient) ChatCompletion(
 }
 
 // ChatCompletionNonStreaming sends a non-streaming request and returns the full parsed response.
-func (c *OpenCodeClient) ChatCompletionNonStreaming(
+func (c *Client) ChatCompletionNonStreaming(
 	ctx context.Context,
 	modelID string,
 	req *types.ChatCompletionRequest,
@@ -147,7 +147,7 @@ func (c *OpenCodeClient) ChatCompletionNonStreaming(
 
 // GetStreamingBody returns the response body for streaming consumption.
 // The caller is responsible for closing the returned ReadCloser.
-func (c *OpenCodeClient) GetStreamingBody(
+func (c *Client) GetStreamingBody(
 	ctx context.Context,
 	modelID string,
 	req *types.ChatCompletionRequest,
@@ -166,7 +166,7 @@ func (c *OpenCodeClient) GetStreamingBody(
 
 // SendAnthropicRequest sends a raw Anthropic-format request (for MiniMax models).
 // This skips the OpenAI transformation entirely.
-func (c *OpenCodeClient) SendAnthropicRequest(
+func (c *Client) SendAnthropicRequest(
 	ctx context.Context,
 	body []byte,
 	stream bool,
@@ -181,7 +181,7 @@ func (c *OpenCodeClient) SendAnthropicRequest(
 	// Set headers
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("Authorization", "Bearer "+endpoint.APIKey)
-	// Incase OpenCode Go expects x-api-key instead
+	// Incase upstream expects x-api-key instead
 	httpReq.Header.Set("x-api-key", endpoint.APIKey)
 
 	// Add streaming header if requested
