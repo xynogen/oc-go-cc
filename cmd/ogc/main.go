@@ -373,31 +373,19 @@ func getDefaultConfig() string {
       "model_id": "minimax-m2.5",
       "temperature": 0.7,
       "max_tokens": 65536
-    },
-    "qwen3.5-plus": {
-      "provider": "openai",
-      "model_id": "qwen3.5-plus",
-      "temperature": 0.7,
-      "max_tokens": 32768
     }
   },
   "model_mapping": {
     "claude-opus": "minimax-m2.7",
     "claude-sonnet": "minimax-m2.5",
-    "claude-haiku": "qwen3.5-plus"
+    "claude-haiku": "minimax-m2.5"
   },
   "fallbacks": {
     "minimax-m2.7": [
-      { "provider": "openai", "model_id": "minimax-m2.5" },
-      { "provider": "openai", "model_id": "glm-5.1" }
+      { "provider": "openai", "model_id": "minimax-m2.5" }
     ],
     "minimax-m2.5": [
-      { "provider": "openai", "model_id": "glm-5.1" },
-      { "provider": "openai", "model_id": "qwen3.5-plus" }
-    ],
-    "qwen3.5-plus": [
-      { "provider": "openai", "model_id": "qwen3.6-plus" },
-      { "provider": "openai", "model_id": "kimi-k2.6" }
+      { "provider": "openai", "model_id": "minimax-m2.7" }
     ]
   },
   "upstream": {
