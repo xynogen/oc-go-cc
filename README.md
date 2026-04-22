@@ -23,17 +23,16 @@ OpenCode Go gives you access to powerful open coding models for **$5/month** (th
 
 ## Installation
 
-### Homebrew (macOS & Linux)
+### Go Install
 
 ```bash
-brew tap samueltuyizere/tap
-brew install oc-go-cc
+go install github.com/xynogen/oc-go-cc/cmd/oc-go-cc@latest
 ```
 
 ### Build from Source
 
 ```bash
-git clone https://github.com/samueltuyizere/oc-go-cc.git
+git clone https://github.com/xynogen/oc-go-cc.git
 cd oc-go-cc
 make build
 
@@ -44,7 +43,7 @@ make install
 
 ### Download a Release Binary
 
-Download the latest release for your platform from the [Releases page](https://github.com/samueltuyizere/oc-go-cc/releases):
+Download the latest release for your platform from the [Releases page](https://github.com/xynogen/oc-go-cc/releases):
 
 | Platform | File |
 |----------|------|
@@ -57,7 +56,7 @@ Download the latest release for your platform from the [Releases page](https://g
 
 ```bash
 # Example: macOS Apple Silicon
-curl -L -o oc-go-cc https://github.com/samueltuyizere/oc-go-cc/releases/latest/download/oc-go-cc_darwin-arm64
+curl -L -o oc-go-cc https://github.com/xynogen/oc-go-cc/releases/latest/download/oc-go-cc_darwin-arm64
 chmod +x oc-go-cc
 sudo mv oc-go-cc /usr/local/bin/
 ```
@@ -80,7 +79,7 @@ Creates a default config at `~/.config/oc-go-cc/config.json`.
 ### 2. Set Your API Key
 
 ```bash
-export OC_GO_CC_API_KEY=sk-opencode-your-key-here
+export OGC_API_KEY=sk-opencode-your-key-here
 ```
 
 ### 3. Start the Proxy
@@ -186,13 +185,13 @@ That's it. Claude Code will now route all requests through oc-go-cc to OpenCode 
 
 Location: `~/.config/oc-go-cc/config.json`
 
-Override with `OC_GO_CC_CONFIG` environment variable.
+Override with `OGC_CONFIG` environment variable.
 
 ### Full Config Reference
 
 ```json
 {
-  "api_key": "${OC_GO_CC_API_KEY}",
+  "api_key": "${OGC_API_KEY}",
   "host": "127.0.0.1",
   "port": 3456,
 
@@ -255,12 +254,12 @@ Environment variables override config file values. Config values also support `$
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `OC_GO_CC_API_KEY` | OpenCode Go API key (**required**) | — |
-| `OC_GO_CC_CONFIG` | Custom config file path | `~/.config/oc-go-cc/config.json` |
-| `OC_GO_CC_HOST` | Proxy listen host | `127.0.0.1` |
-| `OC_GO_CC_PORT` | Proxy listen port | `3456` |
-| `OC_GO_CC_OPENCODE_URL` | OpenCode Go API endpoint | `https://opencode.ai/zen/go/v1/chat/completions` |
-| `OC_GO_CC_LOG_LEVEL` | Log level: `debug`, `info`, `warn`, `error` | `info` |
+| `OGC_API_KEY` | OpenCode Go API key (**required**) | — |
+| `OGC_CONFIG` | Custom config file path | `~/.config/oc-go-cc/config.json` |
+| `OGC_HOST` | Proxy listen host | `127.0.0.1` |
+| `OGC_PORT` | Proxy listen port | `3456` |
+| `OGC_OPENCODE_URL` | OpenCode Go API endpoint | `https://opencode.ai/zen/go/v1/chat/completions` |
+| `OGC_LOG_LEVEL` | Log level: `debug`, `info`, `warn`, `error` | `info` |
 
 ### Model Routing
 
@@ -361,7 +360,7 @@ This means the proxy couldn't parse the request from Claude Code. Enable debug l
 Or set the environment variable:
 
 ```bash
-export OC_GO_CC_LOG_LEVEL=debug
+export OGC_LOG_LEVEL=debug
 ```
 
 ### "all models failed" Error
@@ -370,7 +369,7 @@ All models in the fallback chain returned errors. Check:
 
 1. Your API key is valid: `oc-go-cc validate`
 2. You haven't exceeded your [usage limits](https://opencode.ai/auth)
-3. The OpenCode Go service is reachable: `curl -H "Authorization: Bearer $OC_GO_CC_API_KEY" https://opencode.ai/zen/go/v1/models`
+3. The OpenCode Go service is reachable: `curl -H "Authorization: Bearer $OGC_API_KEY" https://opencode.ai/zen/go/v1/models`
 
 ### Connection Refused
 
@@ -399,7 +398,7 @@ The proxy transforms OpenAI SSE to Anthropic SSE in real-time. If streaming appe
 For maximum logging, run with debug level:
 
 ```bash
-OC_GO_CC_LOG_LEVEL=debug oc-go-cc serve
+OGC_LOG_LEVEL=debug oc-go-cc serve
 ```
 
 This logs:
@@ -446,7 +445,7 @@ configs/
 - **Polymorphic field handling**: Anthropic's `system` and `content` fields accept both strings and arrays. We use `json.RawMessage` with accessor methods (`SystemText()`, `ContentBlocks()`) to handle both formats correctly.
 - **Real-time stream proxying**: SSE events are transformed in-flight, not buffered. This means Claude Code sees responses as they arrive from OpenCode Go.
 - **Circuit breaker per model**: Each model gets its own circuit breaker. After 3 consecutive failures, the model is skipped for 30 seconds, then tested again.
-- **Environment variable interpolation**: Config values like `"${OC_GO_CC_API_KEY}"` are resolved at load time, so you never need to put secrets in the config file.
+- **Environment variable interpolation**: Config values like `"${OGC_API_KEY}"` are resolved at load time, so you never need to put secrets in the config file.
 
 ## Development
 
@@ -472,6 +471,10 @@ make install
 # Build cross-platform release binaries
 make dist
 ```
+
+## Credits
+
+This project is a fork of [oc-go-cc](https://github.com/samueltuyizere/oc-go-cc) by [samueltuyizere](https://github.com/samueltuyizere). All core ideas, architecture, and original implementation belong to them.
 
 ## License
 
